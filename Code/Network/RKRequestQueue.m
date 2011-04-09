@@ -15,12 +15,12 @@
 static RKRequestQueue* gSharedQueue = nil;
 
 static const NSTimeInterval kFlushDelay = 0.3;
-static const NSInteger kMaxConcurrentLoads = 5;
 
 @implementation RKRequestQueue
 
 @synthesize delegate = _delegate;
 @synthesize concurrentRequestsLimit = _concurrentRequestsLimit;
+@synthesize requestTimeout = _requestTimeout;
 @synthesize suspended = _suspended;
 
 + (RKRequestQueue*)sharedQueue {
@@ -42,7 +42,9 @@ static const NSInteger kMaxConcurrentLoads = 5;
 		_requests = [[NSMutableArray alloc] init];
 		_suspended = NO;
 		_totalLoading = 0;
-        
+		_concurrentRequestsLimit = 5;
+		_requestTimeout = 300;
+
 		[[NSNotificationCenter defaultCenter] addObserver:self
 												 selector:@selector(responseDidLoad:)
 													 name:RKResponseReceivedNotification
@@ -51,13 +53,13 @@ static const NSInteger kMaxConcurrentLoads = 5;
 												 selector:@selector(responseDidLoad:)
 													 name:RKRequestFailedWithErrorNotification
 												   object:nil];
-        [[NSNotificationCenter defaultCenter] addObserver:self 
-                                                 selector:@selector(willTransitionToBackground) 
-                                                     name:UIApplicationDidEnterBackgroundNotification 
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(willTransitionToBackground)
+                                                     name:UIApplicationDidEnterBackgroundNotification
                                                    object:nil];
-        [[NSNotificationCenter defaultCenter] addObserver:self 
-                                                 selector:@selector(willTransitionToForeground) 
-                                                     name:UIApplicationWillEnterForegroundNotification 
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(willTransitionToForeground)
+                                                     name:UIApplicationWillEnterForegroundNotification
                                                    object:nil];
 	}
 	return self;
@@ -65,11 +67,11 @@ static const NSInteger kMaxConcurrentLoads = 5;
 
 - (void)dealloc {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-     
+
 	[_queueTimer invalidate];
 	[_requests release];
 	_requests = nil;
-     
+
 	[super dealloc];
 }
 
@@ -85,27 +87,27 @@ static const NSInteger kMaxConcurrentLoads = 5;
 
 - (void)loadNextInQueue {
 	// This makes sure that the Request Queue does not fire off any requests until the Reachability state has been determined.
-	if ([[[RKClient sharedClient] baseURLReachabilityObserver] networkStatus] == RKReachabilityIndeterminate || 
+	if ([[[RKClient sharedClient] baseURLReachabilityObserver] networkStatus] == RKReachabilityIndeterminate ||
         self.suspended) {
-    _queueTimer = nil;
+		_queueTimer = nil;
 		[self loadNextInQueueDelayed];
 		return;
 	}
-	
+
 	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 
 	_queueTimer = nil;
 
 	NSArray* requestsCopy = [NSArray arrayWithArray:_requests];
 	for (RKRequest* request in requestsCopy) {
-		if (![request isLoading] && ![request isLoaded] && _totalLoading < kMaxConcurrentLoads) {            
+		if (![request isLoading] && ![request isLoaded] && _totalLoading < _concurrentRequestsLimit) {
             if ([_delegate respondsToSelector:@selector(requestQueue:willSendRequest:)]) {
                 [_delegate requestQueue:self willSendRequest:request];
             }
-            
+
             ++_totalLoading;
             [request sendAsynchronously];
-            
+
             if ([_delegate respondsToSelector:@selector(requestQueue:didSendRequest:)]) {
                 [_delegate requestQueue:self didSendRequest:request];
             }
@@ -115,13 +117,13 @@ static const NSInteger kMaxConcurrentLoads = 5;
 	if (_requests.count && !_suspended) {
 		[self loadNextInQueueDelayed];
 	}
-    
+
     if (!_requests.count) {
         if ([_delegate respondsToSelector:@selector(requestQueueDidFinish:)]) {
             [_delegate requestQueueDidFinish:self];
         }
     }
-	
+
 	[pool drain];
 }
 
@@ -129,7 +131,7 @@ static const NSInteger kMaxConcurrentLoads = 5;
     if (_suspended && !isSuspended && [_delegate respondsToSelector:@selector(requestQueueDidStart:)]) {
 		[_delegate requestQueueDidStart:self];
 	}
-    
+
 	_suspended = isSuspended;
 
 	if (!_suspended) {
@@ -152,7 +154,7 @@ static const NSInteger kMaxConcurrentLoads = 5;
         if ([_delegate respondsToSelector:@selector(requestQueue:didCancelRequest:)]) {
             [_delegate requestQueue:self didCancelRequest:request];
         }
-        
+
 		[_requests removeObject:request];
 		_totalLoading--;
 
@@ -205,28 +207,28 @@ static const NSInteger kMaxConcurrentLoads = 5;
 			RKRequest* request = [(RKResponse*)notification.object request];
 			[_requests removeObject:request];
 			_totalLoading--;
-            
+
             if ([_delegate respondsToSelector:@selector(requestQueue:didLoadResponse:)]) {
                 [_delegate requestQueue:self didLoadResponse:(RKResponse*)notification.object];
             }
-            
+
             // Our RKRequest failed and we're notified with the original RKRequest object
 		} else if ([notification.object isKindOfClass:[RKRequest class]]) {
 			RKRequest* request = (RKRequest*)notification.object;
 			[_requests removeObject:request];
 			_totalLoading--;
-            
+
             NSDictionary* userInfo = [notification userInfo];
             NSError* error = nil;
             if (userInfo) {
                 error = [userInfo objectForKey:@"error"];
             }
-            
+
             if ([_delegate respondsToSelector:@selector(requestQueue:didFailRequest:withError:)]) {
                 [_delegate requestQueue:self didFailRequest:request withError:error];
             }
 		}
-        
+
 		[self loadNextInQueue];
 	}
 }

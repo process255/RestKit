@@ -20,6 +20,7 @@
     NSObject<RKRequestQueueDelegate>* _delegate;
 	NSInteger _totalLoading;
     NSInteger _concurrentRequestsLimit;
+	NSUInteger _requestTimeout;
 	NSTimer*  _queueTimer;
 	BOOL _suspended;
 }
@@ -34,8 +35,15 @@
 
 /**
  * The number of current requests supported by this queue
+ * Defaults to 5
  */
 @property (nonatomic) NSInteger concurrentRequestsLimit;
+
+/**
+ * Request timeout value used by the queue
+ * Defaults to 5 minutes (300 seconds)
+ */
+@property (nonatomic, assign) NSUInteger requestTimeout;
 
 /**
  * Gets the flag that determines if new load requests are allowed to reach the network.
