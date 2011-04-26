@@ -26,6 +26,25 @@ typedef enum RKRequestMethod {
 } RKRequestMethod;
 
 /**
+ * Cache policy for determining how to use RKCache
+ */
+typedef enum {
+	// Never use the cache
+    RKRequestCachePolicyNone = 0,
+
+	// Load from the cache when we are offline
+    RKRequestCachePolicyLoadIfOffline = 1 << 0,
+
+	// Load from the cache if we encounter an error
+    RKRequestCachePolicyLoadOnError = 1 << 1,
+
+	// Load from the cache if we have data stored and the server returns a 304 (not modified) response
+    RKRequestCachePolicyEtag = 1 << 2,
+
+    RKRequestCachePolicyDefault = RKRequestCachePolicyEtag
+} RKRequestCachePolicy;
+
+/**
  * Background Request Policy
  *
  * On iOS 4.x and higher, UIKit provides
@@ -56,6 +75,7 @@ typedef enum RKRequestBackgroundPolicy {
 	RKRequestMethod _method;
 	BOOL _isLoading;
 	BOOL _isLoaded;
+	RKRequestCachePolicy _cachePolicy;
     RKRequestBackgroundPolicy _backgroundPolicy;
     
     #if TARGET_OS_IPHONE
@@ -131,6 +151,10 @@ typedef enum RKRequestBackgroundPolicy {
  * The HTTP method as a string used for this request
  */
 @property(nonatomic, readonly) NSString* HTTPMethod;
+
+@property (nonatomic, readonly) NSString* cacheKey;
+
+@property (nonatomic, assign) RKRequestCachePolicy cachePolicy;
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////

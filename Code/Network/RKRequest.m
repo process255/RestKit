@@ -14,11 +14,14 @@
 #import "RKClient.h"
 #import "../Support/Support.h"
 #import "RKURL.h"
+#import "NSData+MD5.h"
+#import "NSString+MD5.h"
 
 @implementation RKRequest
 
 @synthesize URL = _URL, URLRequest = _URLRequest, delegate = _delegate, additionalHTTPHeaders = _additionalHTTPHeaders,
-      			params = _params, userData = _userData, username = _username, password = _password, method = _method;
+			params = _params, userData = _userData, username = _username, password = _password, method = _method,
+			cachePolicy = _cachePolicy;
 
 #if TARGET_OS_IPHONE
 @synthesize backgroundPolicy = _backgroundPolicy, backgroundTaskIdentifier = _backgroundTaskIdentifier;
@@ -36,15 +39,15 @@
 		_connection = nil;
 		_isLoading = NO;
 		_isLoaded = NO;
+		_cachePolicy = RKRequestCachePolicyDefault;
 	}
-    
 	return self;
 }
 
 - (id)initWithURL:(NSURL*)URL delegate:(id)delegate {
     self = [self initWithURL:URL];
 	if (self) {
-		_delegate = delegate;        
+		_delegate = delegate;
 	}
 	return self;
 }
@@ -132,6 +135,11 @@
 		if ([_params respondsToSelector:@selector(HTTPHeaderValueForContentLength)]) {
 			[_URLRequest setValue:[NSString stringWithFormat:@"%d", [_params HTTPHeaderValueForContentLength]] forHTTPHeaderField:@"Content-Length"];
 		}
+	}
+
+	NSString* etag = [[[RKClient sharedClient] cache] etagForRequest:self];
+	if (etag) {
+		[_URLRequest setValue:etag forHTTPHeaderField:@"If-None-Match"];
 	}
 }
 
@@ -237,12 +245,20 @@
         [self fireAsynchronousRequest];
 #endif
 	} else {
-		NSString* errorMessage = [NSString stringWithFormat:@"The client is unable to contact the resource at %@", [[self URL] absoluteString]];
-		NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
-								  errorMessage, NSLocalizedDescriptionKey,
-								  nil];
-		NSError* error = [NSError errorWithDomain:RKRestKitErrorDomain code:RKRequestBaseURLOfflineError userInfo:userInfo];
-		[self didFailLoadWithError:error];
+	    if (_cachePolicy & RKRequestCachePolicyLoadIfOffline &&
+			[[[RKClient sharedClient] cache] hasResponseForRequest:self]) {
+
+			_isLoading = YES;
+			[self didFinishLoad:[[[RKClient sharedClient] cache] responseForRequest:self]];
+
+		} else {
+            NSString* errorMessage = [NSString stringWithFormat:@"The client is unable to contact the resource at %@", [[self URL] absoluteString]];
+    		NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+    								  errorMessage, NSLocalizedDescriptionKey,
+    								  nil];
+    		NSError* error = [NSError errorWithDomain:RKRestKitErrorDomain code:RKRequestBaseURLOfflineError userInfo:userInfo];
+    		[self didFailLoadWithError:error];
+        }
 	}
 }
 
@@ -267,22 +283,29 @@
         
 		payload = [NSURLConnection sendSynchronousRequest:_URLRequest returningResponse:&URLResponse error:&error];
 		response = [[[RKResponse alloc] initWithSynchronousRequest:self URLResponse:URLResponse body:payload error:error] autorelease];
-        
+
         if (error) {
-            [self didFailLoadWithError:error];
+			[self didFailLoadWithError:error];
         } else {
             [self didFinishLoad:response];
         }
 	} else {
-		NSString* errorMessage = [NSString stringWithFormat:@"The client is unable to contact the resource at %@", [[self URL] absoluteString]];
-		NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
-								  errorMessage, NSLocalizedDescriptionKey,
-								  nil];
-		error = [NSError errorWithDomain:RKRestKitErrorDomain code:RKRequestBaseURLOfflineError userInfo:userInfo];
-		[self didFailLoadWithError:error];
+		if (_cachePolicy & RKRequestCachePolicyLoadIfOffline &&
+			[[[RKClient sharedClient] cache] hasResponseForRequest:self]) {
 
-		// TODO: Is this needed here?  Or can we just return a nil response and everyone will be happy??
-		response = [[[RKResponse alloc] initWithSynchronousRequest:self URLResponse:URLResponse body:payload error:error] autorelease];
+			response = [[[RKClient sharedClient] cache] responseForRequest:self];
+
+		} else {
+			NSString* errorMessage = [NSString stringWithFormat:@"The client is unable to contact the resource at %@", [[self URL] absoluteString]];
+			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+									  errorMessage, NSLocalizedDescriptionKey,
+									  nil];
+			error = [NSError errorWithDomain:RKRestKitErrorDomain code:RKRequestBaseURLOfflineError userInfo:userInfo];
+			[self didFailLoadWithError:error];
+
+			// TODO: Is this needed here?  Or can we just return a nil response and everyone will be happy??
+			response = [[[RKResponse alloc] initWithSynchronousRequest:self URLResponse:URLResponse body:payload error:error] autorelease];
+		}
 	}
 
 	return response;
@@ -292,30 +315,47 @@
     [self cancelAndInformDelegate:YES];
 }
 
+// TODO: Isn't this code duplicated higher up???
 - (void)didFailLoadWithError:(NSError*)error {
-	_isLoading = NO;
+	if (_cachePolicy & RKRequestCachePolicyLoadOnError &&
+		[[[RKClient sharedClient] cache] hasResponseForRequest:self]) {
 
-	if ([_delegate respondsToSelector:@selector(request:didFailLoadWithError:)]) {
-		[_delegate request:self didFailLoadWithError:error];
+		[self didFinishLoad:[[[RKClient sharedClient] cache] responseForRequest:self]];
+	} else {
+		_isLoading = NO;
+
+		if ([_delegate respondsToSelector:@selector(request:didFailLoadWithError:)]) {
+			[_delegate request:self didFailLoadWithError:error];
+		}
+        
+		[[NSNotificationCenter defaultCenter] postNotificationName:RKRequestFailedWithErrorNotification object:self userInfo:nil];
 	}
-
-	[[NSNotificationCenter defaultCenter] postNotificationName:RKRequestFailedWithErrorNotification object:self userInfo:nil];
 }
 
 - (void)didFinishLoad:(RKResponse*)response {
   	_isLoading = NO;
   	_isLoaded = YES;
 
-  	if ([_delegate respondsToSelector:@selector(request:didLoadResponse:)]) {
-  		[_delegate request:self didLoadResponse:response];
-  	}
-  
+	RKResponse* finalResponse = response;
+
+	if ((_cachePolicy & RKRequestCachePolicyEtag) && [response isNotModified]) {
+		finalResponse = [[[RKClient sharedClient] cache] responseForRequest:self];
+	}
+
+	if (![response wasLoadedFromCache] && [response isSuccessful] && (_cachePolicy != RKRequestCachePolicyNone)) {
+		[[[RKClient sharedClient] cache] storeResponse:response forRequest:self];
+	}
+
+	if ([_delegate respondsToSelector:@selector(request:didLoadResponse:)]) {
+		[_delegate request:self didLoadResponse:finalResponse];
+	}
+    
     if ([response isServiceUnavailable]) {
         [[NSNotificationCenter defaultCenter] postNotificationName:RKServiceDidBecomeUnavailableNotification object:self];
     }
     
-    NSDictionary* userInfo = [NSDictionary dictionaryWithObject:response forKey:@"response"];
-    [[NSNotificationCenter defaultCenter] postNotificationName:RKRequestDidLoadResponseNotification object:self userInfo:userInfo];
+    NSDictionary* userInfo = [NSDictionary dictionaryWithObject:finalResponse forKey:@"response"];
+	[[NSNotificationCenter defaultCenter] postNotificationName:RKRequestDidLoadResponseNotification object:self userInfo:userInfo];
     
     // NOTE: This notification must be posted last as the request queue releases the request when it
     // receives the notification
@@ -370,6 +410,22 @@
         [self send];
     }
 #endif
+}
+
+- (NSString*)cacheKey {
+	switch (_method) {
+		case RKRequestMethodGET:
+			return [[self.URL absoluteString] MD5];
+			break;
+		case RKRequestMethodPOST:
+		case RKRequestMethodPUT:
+			return [[_URLRequest HTTPBody] MD5];
+			break;
+		case RKRequestMethodDELETE:
+		default:
+			return nil;
+			break;
+	}
 }
 
 @end

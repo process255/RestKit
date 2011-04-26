@@ -20,6 +20,8 @@
 	if (self) {
 		_body = [[NSMutableData alloc] init];
 		_failureError = nil;
+		_loading = NO;
+		_responseHeaders = nil;
 	}
 
 	return self;
@@ -36,6 +38,18 @@
 	return self;
 }
 
+- (id)initWithRequest:(RKRequest*)request body:(NSData*)body headers:(NSDictionary*)headers {
+	self = [self initWithRequest:request];
+	if (self) {
+		[_body release];
+		_body = nil;
+		_body = [body retain];
+		_responseHeaders = [headers retain];
+	}
+
+	return self;
+}
+
 - (id)initWithSynchronousRequest:(RKRequest*)request URLResponse:(NSURLResponse*)URLResponse body:(NSData*)body error:(NSError*)error {
     self = [super init];
 	if (self) {
@@ -45,6 +59,7 @@
 		_httpURLResponse = [URLResponse retain];
 		_failureError = [error retain];
 		_body = [body retain];
+		_loading = NO;
 	}
 
 	return self;
@@ -52,8 +67,13 @@
 
 - (void)dealloc {
 	[_httpURLResponse release];
+	_httpURLResponse = nil;
 	[_body release];
+	_body = nil;
 	[_failureError release];
+	_failureError = nil;
+	[_responseHeaders release];
+	_responseHeaders = nil;
 	[super dealloc];
 }
 
@@ -105,6 +125,10 @@
 	return [NSHTTPURLResponse localizedStringForStatusCode:[self statusCode]];
 }
 
+- (NSData*)body {
+	return _body;
+}
+
 - (NSString*)bodyAsString {
 	return [[[NSString alloc] initWithData:self.body encoding:NSUTF8StringEncoding] autorelease];
 }
@@ -121,6 +145,10 @@
 	}
 }
 
+- (BOOL)wasLoadedFromCache {
+	return (_responseHeaders != nil);
+}
+
 - (NSURL*)URL {
 	return [_httpURLResponse URL];
 }
@@ -134,6 +162,9 @@
 }
 
 - (NSDictionary*)allHeaderFields {
+	if ([self wasLoadedFromCache]) {
+		return _responseHeaders;
+	}
 	return [_httpURLResponse allHeaderFields];
 }
 
@@ -154,7 +185,7 @@
 }
 
 - (BOOL)isSuccessful {
-	return ([self statusCode] >= 200 && [self statusCode] < 300);
+	return (([self statusCode] >= 200 && [self statusCode] < 300) || ([self wasLoadedFromCache]));
 }
 
 - (BOOL)isRedirection {
@@ -179,6 +210,10 @@
 
 - (BOOL)isCreated {
 	return ([self statusCode] == 201);
+}
+
+- (BOOL)isNotModified {
+	return ([self statusCode] == 304);
 }
 
 - (BOOL)isUnauthorized {
@@ -223,23 +258,30 @@
 
 - (BOOL)isHTML {
 	NSString* contentType = [self contentType];
-	return contentType && ([contentType rangeOfString:@"text/html" options:NSCaseInsensitiveSearch|NSAnchoredSearch].length > 0 ||
-						   [self isXHTML]);
+	return (contentType && ([contentType rangeOfString:@"text/html"
+											   options:NSCaseInsensitiveSearch|NSAnchoredSearch].length > 0 ||
+						   [self isXHTML]));
 }
 
 - (BOOL)isXHTML {
 	NSString* contentType = [self contentType];
-	return contentType && [contentType rangeOfString:@"application/xhtml+xml" options:NSCaseInsensitiveSearch|NSAnchoredSearch].length > 0;
+	return (contentType &&
+			[contentType rangeOfString:@"application/xhtml+xml"
+							   options:NSCaseInsensitiveSearch|NSAnchoredSearch].length > 0);
 }
 
 - (BOOL)isXML {
 	NSString* contentType = [self contentType];
-	return contentType && [contentType rangeOfString:@"application/xml" options:NSCaseInsensitiveSearch|NSAnchoredSearch].length > 0;
+	return (contentType &&
+			[contentType rangeOfString:@"application/xml"
+							   options:NSCaseInsensitiveSearch|NSAnchoredSearch].length > 0);
 }
 
 - (BOOL)isJSON {
 	NSString* contentType = [self contentType];
-	return contentType && [contentType rangeOfString:@"application/json" options:NSCaseInsensitiveSearch|NSAnchoredSearch].length > 0;
+	return (contentType &&
+			[contentType rangeOfString:@"application/json"
+							   options:NSCaseInsensitiveSearch|NSAnchoredSearch].length > 0);
 }
 
 @end

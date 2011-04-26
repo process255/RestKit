@@ -29,24 +29,24 @@
 }
 
 - (id)initWithResourcePath:(NSString*)resourcePath objectManager:(RKObjectManager*)objectManager delegate:(NSObject<RKObjectLoaderDelegate>*)delegate {
-	if ((self = [super initWithURL:[objectManager.client URLForResourcePath:resourcePath] delegate:delegate])) {		
+	if ((self = [super initWithURL:[objectManager.client URLForResourcePath:resourcePath] delegate:delegate])) {
         _objectManager = objectManager;
-        
-        [self.client setupRequest:self];
+
+        [self.objectManager.client setupRequest:self];
 	}
-    
+
 	return self;
 }
 
 - (void)dealloc {
     // Weak reference
     _objectManager = nil;
-    
+
 	[_response release];
 	_response = nil;
 	[_keyPath release];
 	_keyPath = nil;
-    
+
 	[super dealloc];
 }
 
@@ -96,7 +96,7 @@
 		return YES;
 	} else if ([response isError]) {
 		NSError* error = nil;
-        
+
         // TODO: Unwind hard coding of JSON specific assumptions
 		if ([response isJSON]) {
 			error = [self.objectMapper parseErrorFromString:[response bodyAsString]];
@@ -174,31 +174,47 @@
 }
 
 - (void)didFailLoadWithError:(NSError*)error {
-	if ([_delegate respondsToSelector:@selector(request:didFailLoadWithError:)]) {
-		[_delegate request:self didFailLoadWithError:error];
+	if (_cachePolicy & RKRequestCachePolicyLoadOnError &&
+		[[[RKClient sharedClient] cache] hasResponseForRequest:self]) {
+
+		[self didFinishLoad:[[[RKClient sharedClient] cache] responseForRequest:self]];
+	} else {
+		if ([_delegate respondsToSelector:@selector(request:didFailLoadWithError:)]) {
+			[_delegate request:self didFailLoadWithError:error];
+		}
+
+		[(NSObject<RKObjectLoaderDelegate>*)_delegate objectLoader:self didFailWithError:error];
+
+		[self responseProcessingSuccessful:NO withError:error];
 	}
-
-	[(NSObject<RKObjectLoaderDelegate>*)_delegate objectLoader:self didFailWithError:error];
-
-	[self responseProcessingSuccessful:NO withError:error];
 }
 
 - (void)didFinishLoad:(RKResponse*)response {
 	_response = [response retain];
-    
-    if ([_delegate respondsToSelector:@selector(request:didLoadResponse:)]) {
-        [_delegate request:self didLoadResponse:response];
-    }
-    
+
+	if ((_cachePolicy & RKRequestCachePolicyEtag) && [response isNotModified]) {
+		[_response release];
+		_response = nil;
+		_response = [[[[RKClient sharedClient] cache] responseForRequest:self] retain];
+	}
+
+	if (![_response wasLoadedFromCache] && [_response isSuccessful] && (_cachePolicy != RKRequestCachePolicyNone)) {
+		[[[RKClient sharedClient] cache] storeResponse:_response forRequest:self];
+	}
+
+	if ([_delegate respondsToSelector:@selector(request:didLoadResponse:)]) {
+		[_delegate request:self didLoadResponse:_response];
+	}
+
 	if (NO == [self encounteredErrorWhileProcessingRequest:response]) {
         // TODO: Should probably be an expected MIME types array set by client/manager
         // if ([self.objectMapper hasParserForMIMEType:[response MIMEType]) canMapFromMIMEType:
-        BOOL isAcceptable = (self.objectMapper.format == RKMappingFormatXML && [response isXML]) ||
-                            (self.objectMapper.format == RKMappingFormatJSON && [response isJSON]);
-		if ([response isSuccessful] && isAcceptable) {
-			[self performSelectorInBackground:@selector(processLoadModelsInBackground:) withObject:response];
+        BOOL isAcceptable = (self.objectMapper.format == RKMappingFormatXML && [_response isXML]) ||
+                            (self.objectMapper.format == RKMappingFormatJSON && [_response isJSON]);
+		if ([_response isSuccessful] && isAcceptable) {
+			[self performSelectorInBackground:@selector(processLoadModelsInBackground:) withObject:_response];
 		} else {
-			NSLog(@"Encountered unexpected response code: %d (MIME Type: %@)", response.statusCode, response.MIMEType);
+			NSLog(@"Encountered unexpected response code: %d (MIME Type: %@)", _response.statusCode, _response.MIMEType);
 			if ([_delegate respondsToSelector:@selector(objectLoaderDidLoadUnexpectedResponse:)]) {
 				[(NSObject<RKObjectLoaderDelegate>*)_delegate objectLoaderDidLoadUnexpectedResponse:self];
 			}

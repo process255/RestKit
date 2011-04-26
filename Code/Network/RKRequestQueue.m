@@ -145,9 +145,9 @@ static const NSTimeInterval kFlushDelay = 0.3;
 	}
 
 	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
-	
+
 	_queueTimer = nil;
-	
+
 	NSArray* requestsCopy = [NSArray arrayWithArray:_requests];
 	for (RKRequest* request in requestsCopy) {
 		if (![request isLoading] && ![request isLoaded] && self.loadingCount < _concurrentRequestsLimit) {            
@@ -187,7 +187,7 @@ static const NSTimeInterval kFlushDelay = 0.3;
     }
 
 	_suspended = isSuspended;
-	
+
 	if (!_suspended) {
 		[self loadNextInQueue];
 	} else if (_queueTimer) {
