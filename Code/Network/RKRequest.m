@@ -70,8 +70,6 @@
         return;
     }
     
-    NSLog(@"Cleaning up background task...");
-    
     UIApplication* app = [UIApplication sharedApplication];
     if ([app respondsToSelector:@selector(beginBackgroundTaskWithExpirationHandler:)]) {
     		[app endBackgroundTask:_backgroundTaskIdentifier];
@@ -136,11 +134,13 @@
 			[_URLRequest setValue:[NSString stringWithFormat:@"%d", [_params HTTPHeaderValueForContentLength]] forHTTPHeaderField:@"Content-Length"];
 		}
 	}
-
-	NSString* etag = [[[RKClient sharedClient] cache] etagForRequest:self];
-	if (etag) {
-		[_URLRequest setValue:etag forHTTPHeaderField:@"If-None-Match"];
-	}
+    
+    if (self.cachePolicy & RKRequestCachePolicyEtag) {
+        NSString* etag = [[[RKClient sharedClient] cache] etagForRequest:self];
+        if (etag) {
+            [_URLRequest setValue:etag forHTTPHeaderField:@"If-None-Match"];
+        }
+    }
 }
 
 // Setup the NSURLRequest. The request must be prepared right before dispatching
