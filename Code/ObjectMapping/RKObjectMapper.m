@@ -275,7 +275,11 @@ static const NSString* kRKModelMapperRailsDateFormatString = @"MM/dd/yyyy";
     for (NSDictionary* elements in [self mappableElementsForArrayOfDictionaries:array withObjectClass:objectClass]) {
 		if (![elements isKindOfClass:[NSNull class]]) {
 			id object = [self createOrUpdateInstanceOfModelClass:objectClass fromElements:elements];
-			[objects addObject:object];
+            if (object) {
+                [objects addObject:object];
+            } else {
+                NSLog(@"Warning: Failed to map instance of class %@ from elements: %@", NSStringFromClass(objectClass), elements);
+            }
 		}
 	}
 	
