@@ -77,4 +77,8 @@
     return nil;
 }
 
+- (NSString*)titleForEmpty {
+    return @"Empty!";
+}
+
 @end

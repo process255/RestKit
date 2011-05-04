@@ -120,7 +120,11 @@ static NSString* const kDefaultLoadedTimeKey = @"RKRequestTTModelDefaultLoadedTi
 	NSTimeInterval sinceNow = [self.loadedTime timeIntervalSinceNow];
 	if (![self isLoading] && !_emptyReloadAttempted && _objects && [_objects count] == 0) {
 		_emptyReloadAttempted = YES;
-		return YES;
+        
+        // TODO: Returning YES from here causes the view to enter an infinite
+        // loading state if you switch data sources
+        //		return YES;
+        return NO;
 	}
 	return (![self isLoading] && (-sinceNow > _refreshRate));
 }
