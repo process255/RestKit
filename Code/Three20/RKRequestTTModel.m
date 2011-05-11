@@ -35,6 +35,9 @@ static NSString* const kDefaultLoadedTimeKey = @"RKRequestTTModelDefaultLoadedTi
 @synthesize method = _method;
 @synthesize refreshRate = _refreshRate;
 
+// ADDED BY SEAN DOUGHERTY ON 5.7.11
+@synthesize objectLoader = _objectLoader;
+
 + (NSDate*)defaultLoadedTime {
 	NSDate* defaultLoadedTime = [[NSUserDefaults standardUserDefaults] objectForKey:kDefaultLoadedTimeKey];
 	if (defaultLoadedTime == nil) {
@@ -107,6 +110,9 @@ static NSString* const kDefaultLoadedTimeKey = @"RKRequestTTModelDefaultLoadedTi
 }
 
 - (void)dealloc {
+    // ADDED BY SEAN DOUGHERTY ON 5.7.11
+    [_objectLoader release];
+    
 	[[RKRequestQueue sharedQueue] cancelRequestsWithDelegate:self];
 	[_objects release];
 	_objects = nil;
@@ -169,12 +175,20 @@ static NSString* const kDefaultLoadedTimeKey = @"RKRequestTTModelDefaultLoadedTi
 #pragma mark RKModelLoaderDelegate
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
+    
+    // ADDED BY SEAN DOUGHERTY ON 5.7.11
+    self.objectLoader = objectLoader;
+    
 	_isLoading = NO;
 	[self saveLoadedTime];
 	[self modelsDidLoad:objects];
 }
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
+    
+    // ADDED BY SEAN DOUGHERTY ON 5.7.11
+    self.objectLoader = objectLoader;
+    
 	_isLoading = NO;
 	[self didFailLoadWithError:error];
 //	if ([self errorWarrantsOptionToGoOffline:error]) {
@@ -183,6 +197,10 @@ static NSString* const kDefaultLoadedTimeKey = @"RKRequestTTModelDefaultLoadedTi
 }
 
 - (void)objectLoaderDidLoadUnexpectedResponse:(RKObjectLoader*)objectLoader {
+    
+    // ADDED BY SEAN DOUGHERTY ON 5.7.11
+    self.objectLoader = objectLoader;
+    
 	_isLoading = NO;
 
 	// TODO: Passing a nil error here does nothing for Three20.  Need to construct our

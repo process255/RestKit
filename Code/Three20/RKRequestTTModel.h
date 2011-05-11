@@ -27,7 +27,17 @@
 	NSString* _keyPath;
 
 	NSTimeInterval _refreshRate;
+    
+    // ADDED BY SEAN DOUGHERTY ON 5.7.11
+    RKObjectLoader* _objectLoader;
+    
 }
+
+/**
+ * reference to the loaded object loader
+ * ADDED BY SEAN DOUGHERTY ON 5.7.11
+ */
+@property (nonatomic, retain) RKObjectLoader* objectLoader;
 
 /**
  * Domain objects loaded via this model
