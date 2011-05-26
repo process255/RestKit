@@ -8,12 +8,18 @@
 
 #import "NSDictionary+RKRequestSerialization.h"
 
-// private helper function to convert any object to its string representation
+/**
+ * private helper function to convert any object to its string representation
+ * @private
+ */
 static NSString *toString(id object) {
 	return [NSString stringWithFormat: @"%@", object];
 }
 
-// private helper function to convert string to UTF-8 and URL encode it
+/**
+ * private helper function to convert string to UTF-8 and URL encode it
+ * @private
+ */
 static NSString *urlEncode(id object) {
 	NSString *string = toString(object);
 	NSString *encodedString = (NSString*)CFURLCreateStringByAddingPercentEscapes(NULL,
@@ -33,9 +39,20 @@ static NSString *urlEncode(id object) {
 		id value = [self objectForKey:key];
 		if ([value isKindOfClass:[NSArray class]]) {
 			for (id item in value) {
-				NSString *part = [NSString stringWithFormat: @"%@[]=%@",
-								  urlEncode(key), urlEncode(item)];
-				[parts addObject:part];
+                if ([item isKindOfClass:[NSDictionary class]]) {
+                    // Handle nested object one level deep
+                    for( NSString *nKey in [item allKeys] ) {
+                        id nValue = [item objectForKey:nKey];
+                        NSString *part = [NSString stringWithFormat: @"%@[][%@]=%@",
+                                          urlEncode(key), urlEncode(nKey), urlEncode(nValue)];
+                        [parts addObject:part];
+                    }
+                } else {
+                    // Stringify
+                    NSString *part = [NSString stringWithFormat: @"%@[]=%@",
+                                      urlEncode(key), urlEncode(item)];
+                    [parts addObject:part];
+                }
 			}
 		} else {
 			NSString *part = [NSString stringWithFormat: @"%@=%@",

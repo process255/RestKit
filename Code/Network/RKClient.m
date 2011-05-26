@@ -11,6 +11,7 @@
 #import "RKObjectLoader.h"
 #import "RKURL.h"
 #import "RKNotifications.h"
+#import "RKAlert.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // Global
@@ -64,6 +65,10 @@ NSString* RKMakePathWithObject(NSString* path, id object) {
 	return [NSString stringWithString:interpolatedPath];
 }
 
+NSString* RKPathAppendQueryParams(NSString* resourcePath, NSDictionary* queryParams) {
+    return [NSString stringWithFormat:@"%@?%@", resourcePath, [queryParams URLEncodedString]];
+}
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 @implementation RKClient
@@ -111,6 +116,10 @@ NSString* RKMakePathWithObject(NSString* path, id object) {
 		self.serviceUnavailableAlertEnabled = NO;
 		self.serviceUnavailableAlertTitle = NSLocalizedString(@"Service Unavailable", nil);
 		self.serviceUnavailableAlertMessage = NSLocalizedString(@"The remote resource is unavailable. Please try again later.", nil);
+        [[NSNotificationCenter defaultCenter] addObserver:self 
+                                                 selector:@selector(serviceDidBecomeUnavailableNotification:) 
+                                                     name:RKServiceDidBecomeUnavailableNotification 
+                                                   object:nil];
 	}
 
 	return self;
@@ -139,7 +148,7 @@ NSString* RKMakePathWithObject(NSString* path, id object) {
 }
 
 - (NSString*)resourcePath:(NSString*)resourcePath withQueryParams:(NSDictionary*)queryParams {
-	return [NSString stringWithFormat:@"%@?%@", resourcePath, [queryParams URLEncodedString]];
+	return RKPathAppendQueryParams(resourcePath, queryParams);
 }
 
 - (NSURL*)URLForResourcePath:(NSString*)resourcePath {
@@ -151,7 +160,7 @@ NSString* RKMakePathWithObject(NSString* path, id object) {
 }
 
 - (NSURL*)URLForResourcePath:(NSString *)resourcePath queryParams:(NSDictionary*)queryParams {
-	return [self URLForResourcePath:[self resourcePath:resourcePath withQueryParams:queryParams]];
+	return [self URLForResourcePath:RKPathAppendQueryParams(resourcePath, queryParams)];
 }
 
 - (void)setupRequest:(RKRequest*)request {
@@ -179,7 +188,7 @@ NSString* RKMakePathWithObject(NSString* path, id object) {
     }
 }
 
-- (RKRequest*)requestWithResourcePath:(NSString*)resourcePath delegate:(id)delegate {
+- (RKRequest*)requestWithResourcePath:(NSString*)resourcePath delegate:(NSObject<RKRequestDelegate>*)delegate {
 	RKRequest* request = [[RKRequest alloc] initWithURL:[self URLForResourcePath:resourcePath] delegate:delegate];
 	[self setupRequest:request];
 	[request autorelease];
@@ -221,6 +230,12 @@ NSString* RKMakePathWithObject(NSString* path, id object) {
 
 - (RKRequest*)delete:(NSString*)resourcePath delegate:(id)delegate {
 	return [self load:resourcePath method:RKRequestMethodDELETE params:nil delegate:delegate];
+}
+
+- (void)serviceDidBecomeUnavailableNotification:(NSNotification*)notification {
+    if (self.serviceUnavailableAlertEnabled) {
+        RKAlertWithTitle(self.serviceUnavailableAlertMessage, self.serviceUnavailableAlertTitle);
+    }
 }
 
 @end

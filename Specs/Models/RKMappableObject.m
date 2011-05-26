@@ -11,13 +11,14 @@
 
 @implementation RKMappableObject
 
-@synthesize dateTest = _dateTest, numberTest = _numberTest, stringTest = _stringTest,
+@synthesize dateTest = _dateTest, numberTest = _numberTest, stringTest = _stringTest, urlTest = _urlTest,
 hasOne = _hasOne, hasMany = _hasMany;
 
 + (NSDictionary*)elementToPropertyMappings {
 	return [NSDictionary dictionaryWithKeysAndObjects:@"date_test", @"dateTest", 
 					@"number_test", @"numberTest", 
-					@"string_test", @"stringTest", nil];
+					@"string_test", @"stringTest",
+					@"url_test", @"urlTest", nil];
 }
 
 + (NSDictionary*)elementToRelationshipMappings {
@@ -25,6 +26,10 @@ hasOne = _hasOne, hasMany = _hasMany;
 			@"has_one", @"hasOne",
 			@"has_manys.@unionOfObjects.has_many", @"hasMany", 
 			nil];
+}
+
++ (NSArray*)relationshipsToSerialize {
+    return [NSArray array];
 }
 
 @end

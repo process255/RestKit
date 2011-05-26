@@ -29,8 +29,8 @@ static const NSString* kRKModelMapperRailsDateFormatString = @"MM/dd/yyyy";
 - (Class)typeClassForProperty:(NSString*)property ofClass:(Class)class;
 - (NSDictionary*)elementToPropertyMappingsForModel:(id)model;
 
-- (id)findOrCreateInstanceOfModelClass:(Class)class fromElements:(NSDictionary*)elements;
-- (id)createOrUpdateInstanceOfModelClass:(Class)class fromElements:(NSDictionary*)elements;
+- (NSObject<RKObjectMappable>*)findOrCreateInstanceOfModelClass:(Class)class fromElements:(NSDictionary*)elements;
+- (NSObject<RKObjectMappable>*)createOrUpdateInstanceOfModelClass:(Class)class fromElements:(NSDictionary*)elements;
 
 - (void)updateModel:(id)model ifNewPropertyValue:(id)propertyValue forPropertyNamed:(NSString*)propertyName; // Rename!
 - (void)updateModel:(id)model fromElements:(NSDictionary*)elements;
@@ -163,8 +163,12 @@ static const NSString* kRKModelMapperRailsDateFormatString = @"MM/dd/yyyy";
 	return [self mapFromString:string toClass:nil keyPath:nil];
 }
 
-- (void)mapObject:(NSObject<RKObjectMappable>*)model fromString:(NSString*)string {
+- (void)mapObject:(NSObject<RKObjectMappable>*)model fromString:(NSString*)string keyPath:(NSString*)keyPath {
 	id object = [self parseString:string];
+	if (keyPath) {
+		object = [object valueForKeyPath:keyPath];
+	}
+	
 	if ([object isKindOfClass:[NSDictionary class]]) {
 		[self mapObject:model fromDictionary:object];
 	} else if (nil == object) {
@@ -174,6 +178,10 @@ static const NSString* kRKModelMapperRailsDateFormatString = @"MM/dd/yyyy";
 		[NSException raise:@"Unable to map from requested string"
 					format:@"The object was serialized into a %@. A dictionary of elements was expected. (Object: %@) [Payload: %@]", [object class], object, string];
 	}
+}
+
+- (void)mapObject:(NSObject<RKObjectMappable>*)model fromString:(NSString*)string {
+	[self mapObject:model fromString:string keyPath:nil];
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -203,28 +211,47 @@ static const NSString* kRKModelMapperRailsDateFormatString = @"MM/dd/yyyy";
 	}
 }
 
-- (NSObject<RKObjectMappable>*)mapObjectFromDictionary:(NSDictionary*)dictionary toClass:(Class)class {
+- (id)mapObjectFromDictionary:(NSDictionary*)dictionary toClass:(Class)class {
 	return [self createOrUpdateInstanceOfModelClass:class fromElements:dictionary];
 }
 
 // Lookup an object type using the element to class mappings and map its attributes
 // Expects an object of the form {"registered_type": {"attribute1": "value", "attribute2": "value"}
 - (NSObject<RKObjectMappable>*)mapObjectFromDictionary:(NSDictionary*)dictionary {
-  // TODO: Makes assumptions about the structure of the JSON...
-	NSString* elementName = [[dictionary allKeys] objectAtIndex:0];
-	Class class = [_elementToClassMappings objectForKey:elementName];
-	id elements = [dictionary objectForKey:elementName];
+    // NOTE: This will only map the first matching object in the dictionary will map
+    // Here we have a dictionary that may contain a mappable object. We do not know the
+    // type or keyPath the object or how many will match.
+    // TODO: Move this logic into a more reusable place
+    Class objectClass = nil;
+    NSString* matchedKeyPath = nil;
+    for (NSString* keyPath in [_elementToClassMappings allKeys]) {
+        NSLog(@"Checking for keyPath %@ in %@", keyPath, dictionary);
+        if ([dictionary valueForKeyPath:keyPath]) {
+            if (objectClass) {
+                // TODO: Factor out this log warning and use a self.logger so that we can unit test logging...
+                NSLog(@"WARNING: Multiple mapping targets match in dictionary, using the first match: '%@' => [%@ class]. [Dictionary: %@]", 
+                      matchedKeyPath, NSStringFromClass(objectClass), dictionary);
+            } else {
+                matchedKeyPath = [keyPath copy];
+                objectClass = [_elementToClassMappings valueForKeyPath:keyPath];
+            }
+        }
+    }
+    
+    if (!objectClass) {
+        NSLog(@"Unable to find registered mapping keyPath in payload, returning nil...");
+        return nil;
+    }
+    
+	id elements = [dictionary valueForKeyPath:matchedKeyPath];
 	
     // Support case where elements is an Array of objects
     id model = nil;
     if ([elements isKindOfClass:[NSDictionary class]]) {
-        model = [self findOrCreateInstanceOfModelClass:class fromElements:elements];
+        model = [self findOrCreateInstanceOfModelClass:objectClass fromElements:elements];
         [self updateModel:model fromElements:elements];        
     } else if ([elements isKindOfClass:[NSArray class]]) {
-        model = [self mapObjectsFromArrayOfDictionaries:elements toClass:class];
-    } else {
-        // TODO: Do we want to blow up or log???
-        NSLog(@"Unable to determine how to map object: %@", elements);
+        model = [self mapObjectsFromArrayOfDictionaries:elements toClass:objectClass];
     }
     
 	return model;
@@ -236,7 +263,7 @@ static const NSString* kRKModelMapperRailsDateFormatString = @"MM/dd/yyyy";
 		if (![dictionary isKindOfClass:[NSNull class]]) {
 			// TODO: Makes assumptions about the structure of the JSON...
 			NSString* elementName = [[dictionary allKeys] objectAtIndex:0];
-			Class class = [_elementToClassMappings objectForKey:elementName];
+			Class class = [_elementToClassMappings valueForKeyPath:elementName];
 			NSAssert(class != nil, @"Unable to perform object mapping without a destination class");
 			NSDictionary* elements = [dictionary objectForKey:elementName];
 			id object = [self createOrUpdateInstanceOfModelClass:class fromElements:elements];
@@ -247,11 +274,34 @@ static const NSString* kRKModelMapperRailsDateFormatString = @"MM/dd/yyyy";
 	return (NSArray*)objects;
 }
 
-- (NSArray*)mapObjectsFromArrayOfDictionaries:(NSArray*)array toClass:(Class<RKObjectMappable>)class {
+- (NSDictionary*)mappableElementsForDictionary:(NSDictionary*)elements withObjectClass:(Class<RKObjectMappable>)objectClass {
+    NSArray* elementNames = [_elementToClassMappings allKeysForObject:objectClass];
+	if ([elementNames count] > 0) {		
+		for (NSString* elementName in elementNames) {
+			if ([[elements allKeys] containsObject:elementName]) {
+				return [elements objectForKey:elementName];
+			}
+		}
+	}
+    
+    // Assume that this dictionary is not namespaced and return it
+    return elements;
+}
+
+- (NSArray*)mappableElementsForArrayOfDictionaries:(NSArray*)dictionaries withObjectClass:(Class<RKObjectMappable>)objectClass {
+    NSMutableArray* arrayOfElements = [NSMutableArray arrayWithCapacity:[dictionaries count]];
+    for (NSDictionary* elements in dictionaries) {
+        [arrayOfElements addObject:[self mappableElementsForDictionary:elements withObjectClass:objectClass]];
+    }
+    
+    return arrayOfElements;
+}
+
+- (NSArray*)mapObjectsFromArrayOfDictionaries:(NSArray*)array toClass:(Class<RKObjectMappable>)objectClass {
 	NSMutableArray* objects = [NSMutableArray array];
-	for (NSDictionary* dictionary in array) {
-		if (![dictionary isKindOfClass:[NSNull class]]) {
-			id object = [self createOrUpdateInstanceOfModelClass:class fromElements:dictionary];
+    for (NSDictionary* elements in [self mappableElementsForArrayOfDictionaries:array withObjectClass:objectClass]) {
+		if (![elements isKindOfClass:[NSNull class]]) {
+			id object = [self createOrUpdateInstanceOfModelClass:objectClass fromElements:elements];
 			[objects addObject:object];
 		}
 	}
@@ -344,6 +394,7 @@ static const NSString* kRKModelMapperRailsDateFormatString = @"MM/dd/yyyy";
 }
 
 - (void)setPropertiesOfModel:(NSObject<RKObjectMappable>*)model fromElements:(NSDictionary*)elements {
+    BOOL anyValuesSet = NO;
 	NSDictionary* elementToPropertyMappings = [self elementToPropertyMappingsForModel:model];
 	for (NSString* elementKeyPath in elementToPropertyMappings) {		
 		id elementValue = nil;
@@ -363,6 +414,7 @@ static const NSString* kRKModelMapperRailsDateFormatString = @"MM/dd/yyyy";
 		}
 		
 		if (setValue) {
+            anyValuesSet = YES;
 			id propertyValue = elementValue;
 			NSString* propertyName = [elementToPropertyMappings objectForKey:elementKeyPath];
 			Class class = [self typeClassForProperty:propertyName ofClass:[model class]];
@@ -371,6 +423,9 @@ static const NSString* kRKModelMapperRailsDateFormatString = @"MM/dd/yyyy";
 					NSDate* date = [self parseDateFromString:(propertyValue)];
 					propertyValue = [self dateInLocalTime:date];
 				}
+                else if ([class isEqual:[NSDecimalNumber class]]) {
+                    propertyValue = [NSDecimalNumber decimalNumberWithString:propertyValue];
+                }
 			}
             
             // If we know the destination class, the property is not of the correct class, and the property value is not null or nil...
@@ -386,6 +441,8 @@ static const NSString* kRKModelMapperRailsDateFormatString = @"MM/dd/yyyy";
                     } else {
                         propertyValue = [NSNumber numberWithDouble:[propertyValue doubleValue]];
                     }
+                } else if (class == [NSURL class] && [propertyValue isKindOfClass:[NSString class]]) {
+                    propertyValue = [NSURL URLWithString:propertyValue];
                 } else {
                     [NSException raise:@"NoElementValueConversionMethod" format:@"Don't know how to convert %@ (%@) to %@", propertyValue, [propertyValue class], class];
                 }
@@ -394,6 +451,10 @@ static const NSString* kRKModelMapperRailsDateFormatString = @"MM/dd/yyyy";
 			[self updateModel:model ifNewPropertyValue:propertyValue forPropertyNamed:propertyName];
 		}
 	}
+    
+    if (anyValuesSet == NO) {
+        NSLog(@"WARNING: RestKit did not find any mappable values for the specified object. If you have specified an explicit objectClass for mapping, be sure that the keyPath has been set to target your mappable data.");
+    }
 }
 
 - (void)setRelationshipsOfModel:(NSObject<RKObjectMappable>*)object fromElements:(NSDictionary*)elements {
@@ -409,10 +470,20 @@ static const NSString* kRKModelMapperRailsDateFormatString = @"MM/dd/yyyy";
 			NSLog(@"Caught exception:%@ when trying valueForKeyPath with path:%@ for elements:%@", e, elementKeyPath, elements);
 		}
         
+        // Handle missing elements for the relationship
+        if (relationshipElements == nil) {
+            if (self.missingElementMappingPolicy == RKSetNilForMissingElementMappingPolicy) {
+                [object setValue:nil forKey:propertyName];
+                continue;
+            } else if(self.missingElementMappingPolicy == RKIgnoreMissingElementMappingPolicy) {
+                continue;
+            }
+        }
+        
         // NOTE: The last part of the keyPath contains the elementName for the mapped destination class of our children
         NSArray* componentsOfKeyPath = [elementKeyPath componentsSeparatedByString:@"."];
         NSString *className = [componentsOfKeyPath objectAtIndex:[componentsOfKeyPath count] - 1];
-        Class modelClass = [_elementToClassMappings objectForKey:className];
+        Class modelClass = [_elementToClassMappings valueForKeyPath:className];
         if ([modelClass isKindOfClass: [NSNull class]]) {
             NSLog(@"Warning: could not find a class mapping for relationship '%@':", className);
             NSLog(@"   parent class   : %@", [object class]);
@@ -422,8 +493,7 @@ static const NSString* kRKModelMapperRailsDateFormatString = @"MM/dd/yyyy";
         }
         
         Class collectionClass = [self typeClassForProperty:propertyName ofClass:[object class]];
-        if ([collectionClass isSubclassOfClass:[NSSet class]] || [collectionClass isSubclassOfClass:[NSArray class]])
-        {
+        if ([collectionClass isSubclassOfClass:[NSSet class]] || [collectionClass isSubclassOfClass:[NSArray class]]) {
             id children = nil;
             if ([collectionClass isSubclassOfClass:[NSSet class]]) {
                 children = [NSMutableSet setWithCapacity:[relationshipElements count]];
@@ -443,9 +513,9 @@ static const NSString* kRKModelMapperRailsDateFormatString = @"MM/dd/yyyy";
             id child = [self createOrUpdateInstanceOfModelClass:modelClass fromElements:relationshipElements];		
             [object setValue:child forKey:propertyName];
         }
-        
     }
     
+    // Connect relationships by primary key
     Class managedObjectClass = NSClassFromString(@"RKManagedObject");
     if (managedObjectClass && [object isKindOfClass:managedObjectClass]) {
         RKManagedObject* managedObject = (RKManagedObject*)object;

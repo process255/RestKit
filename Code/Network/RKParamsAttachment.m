@@ -6,7 +6,9 @@
 //  Copyright 2009 Two Toasters. All rights reserved.
 //
 
+#if TARGET_OS_IPHONE
 #import <MobileCoreServices/UTType.h>
+#endif
 #import "RKParamsAttachment.h"
 
 /**
@@ -24,7 +26,8 @@ extern NSString* const kRKStringBoundary;
 
 - (id)initWithName:(NSString*)name {
 	if ((self = [self init])) {
-		_name = [name retain];
+        self.name = name;
+        self.fileName = @"";
 	}
 	
 	return self;
@@ -62,9 +65,12 @@ extern NSString* const kRKStringBoundary;
 		_MIMEType = [[self mimeTypeForExtension:[filePath pathExtension]] retain];
 		_bodyStream    = [[NSInputStream inputStreamWithFileAtPath:filePath] retain];
 		
-		NSError* error = nil;		
-		_bodyLength    = [[[[NSFileManager defaultManager] attributesOfItemAtPath:filePath error:&error] objectForKey:NSFileSize] unsignedIntegerValue];		
-		if (error) {
+		NSError* error;
+		NSDictionary* attributes = [[NSFileManager defaultManager] attributesOfItemAtPath:filePath error:&error];
+		if (attributes) {
+			_bodyLength    = [[attributes objectForKey:NSFileSize] unsignedIntegerValue];
+		}
+		else {
 			NSLog(@"Encountered an error while determining file size: %@", error);
 		}
 	}

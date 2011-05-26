@@ -7,6 +7,7 @@
 //
 
 #import "RKHuman.h"
+#import "NSDictionary+RKAdditions.h"
 
 @implementation RKHuman
 
@@ -18,6 +19,18 @@
 @dynamic age;
 @dynamic createdAt;
 @dynamic updatedAt;
+
+@dynamic cats;
+
++ (NSDictionary*)elementToRelationshipMappings {
+    return [NSDictionary dictionaryWithKeysAndObjects:
+            @"cats", @"cats",
+            nil];
+}
+
++ (NSArray*)relationshipsToSerialize {
+    return [NSArray arrayWithObject:@"cats"];
+}
 
 + (NSDictionary*)elementToPropertyMappings {
 	return [NSDictionary dictionaryWithObjectsAndKeys:

@@ -10,6 +10,8 @@
 #import "RKManagedObject.h"
 #import "RKManagedObjectCache.h"
 
+@class RKManagedObjectStore;
+
 /**
  * Notifications
  */
@@ -17,12 +19,32 @@ extern NSString* const RKManagedObjectStoreDidFailSaveNotification;
 
 ///////////////////////////////////////////////////////////////////
 
+@protocol RKManagedObjectStoreDelegate
+@optional
+
+- (void)managedObjectStore:(RKManagedObjectStore *)objectStore didFailToCreatePersistentStoreCoordinatorWithError:(NSError *)error;
+
+- (void)managedObjectStore:(RKManagedObjectStore *)objectStore didFailToDeletePersistentStore:(NSString *)pathToStoreFile error:(NSError *)error;
+
+- (void)managedObjectStore:(RKManagedObjectStore *)objectStore didFailToCopySeedDatabase:(NSString *)seedDatabase error:(NSError *)error;
+
+- (void)managedObjectStore:(RKManagedObjectStore *)objectStore didFailToSaveContext:(NSManagedObjectContext *)context error:(NSError *)error exception:(NSException *)exception;
+
+@end
+
+///////////////////////////////////////////////////////////////////
+
 @interface RKManagedObjectStore : NSObject {
-	NSString* _storeFilename;	
+	NSObject<RKManagedObjectStoreDelegate>* _delegate;
+	NSString* _storeFilename;
+	NSString* _pathToStoreFile;
     NSManagedObjectModel* _managedObjectModel;
 	NSPersistentStoreCoordinator* _persistentStoreCoordinator;
 	NSObject<RKManagedObjectCache>* _managedObjectCache;
 }
+
+// The delegate for this object store
+@property (nonatomic, assign) NSObject<RKManagedObjectStoreDelegate>* delegate;
 
 // The filename of the database backing this object store
 @property (nonatomic, readonly) NSString* storeFilename;
@@ -53,11 +75,21 @@ extern NSString* const RKManagedObjectStoreDidFailSaveNotification;
 + (RKManagedObjectStore*)objectStoreWithStoreFilename:(NSString*)storeFilename;
 
 /**
- * Initialize a new managed object store backed by a SQLite database with the specified filename. If a seed database name is provided
- * and no existing database is found, initialize the store by copying the seed database from the main bundle. If the managed object model
- * provided is nil, all models will be merged from the main bundle for you.
+ * Initialize a new managed object store backed by a SQLite database with the specified filename.
+ * If a seed database name is provided and no existing database is found, initialize the store by
+ * copying the seed database from the main bundle. If the managed object model provided is nil,
+ * all models will be merged from the main bundle for you.
  */
 + (RKManagedObjectStore*)objectStoreWithStoreFilename:(NSString *)storeFilename usingSeedDatabaseName:(NSString *)nilOrNameOfSeedDatabaseInMainBundle managedObjectModel:(NSManagedObjectModel*)nilOrManagedObjectModel;
+
+/**
+ * Initialize a new managed object store backed by a SQLite database with the specified filename,
+ * in the specified directory. If no directory is specified, will use the app's Documents
+ * directory. If a seed database name is provided and no existing database is found, initialize
+ * the store by copying the seed database from the main bundle. If the managed object model
+ * provided is nil, all models will be merged from the main bundle for you.
+ */
++ (RKManagedObjectStore*)objectStoreWithStoreFilename:(NSString *)storeFilename inDirectory:(NSString *)directory usingSeedDatabaseName:(NSString *)nilOrNameOfSeedDatabaseInMainBundle managedObjectModel:(NSManagedObjectModel*)nilOrManagedObjectModel;
 
 /**
  * Initialize a new managed object store with a SQLite database with the filename specified
@@ -74,6 +106,7 @@ extern NSString* const RKManagedObjectStoreDidFailSaveNotification;
  * This deletes and recreates the managed object context and 
  * persistant store, effectively clearing all data
  */
+- (void)deletePersistantStoreUsingSeedDatabaseName:(NSString *)seedFile;
 - (void)deletePersistantStore;
 
 /**

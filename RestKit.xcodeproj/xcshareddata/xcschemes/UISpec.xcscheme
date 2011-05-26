@@ -61,8 +61,8 @@
       <EnvironmentVariables>
          <EnvironmentVariable
             key = "UISPEC_SPEC"
-            value = "RKObjectMapperSpec"
-            isEnabled = "NO">
+            value = "RKUserRailsJSONMappingSpec"
+            isEnabled = "YES">
          </EnvironmentVariable>
          <EnvironmentVariable
             key = "RESTKIT_IP_ADDRESS"
@@ -71,8 +71,8 @@
          </EnvironmentVariable>
          <EnvironmentVariable
             key = "UISPEC_EXAMPLE"
-            value = "itShouldNotCrashWhenAttemptingToMapWithAMissingElement"
-            isEnabled = "NO">
+            value = "itShouldMapToAnEmptyObjectAndLogAWarningWhenExplicitlyGivenAnObjectClassAndThePayloadIsNotMappable"
+            isEnabled = "YES">
          </EnvironmentVariable>
       </EnvironmentVariables>
       <AdditionalOptions>

@@ -36,7 +36,7 @@
 + (NSArray*)objectsWithFetchRequest:(NSFetchRequest*)fetchRequest {
 	NSError* error = nil;
 	NSArray* objects = [[RKManagedObject managedObjectContext] executeFetchRequest:fetchRequest error:&error];
-	if (error != nil) {
+	if (objects == nil) {
 		NSLog(@"Error: %@", [error localizedDescription]);
 		// TODO: Error handling
 	}
@@ -151,6 +151,10 @@
 	return [NSDictionary dictionary];
 }
 
++ (NSArray*)relationshipsToSerialize {
+	return [NSArray array];
+}
+
 #pragma mark Helpers
 
 - (id)primaryKeyValue {
@@ -159,6 +163,10 @@
 
 - (NSDictionary*)propertiesForSerialization {
 	return RKObjectMappableGetPropertiesByElement(self);
+}
+
+- (NSDictionary*)relationshipsForSerialization {
+	return RKObjectMappableGetRelationshipsByElement(self);
 }
 
 - (BOOL)isNew {

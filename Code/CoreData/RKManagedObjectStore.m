@@ -7,13 +7,13 @@
 //
 
 #import "RKManagedObjectStore.h"
-#import <UIKit/UIKit.h>
+#import "RKAlert.h"
 
 NSString* const RKManagedObjectStoreDidFailSaveNotification = @"RKManagedObjectStoreDidFailSaveNotification";
 static NSString* const kRKManagedObjectContextKey = @"RKManagedObjectContext";
 
 @interface RKManagedObjectStore (Private)
-- (id)initWithStoreFilename:(NSString *)storeFilename usingSeedDatabaseName:(NSString *)nilOrNameOfSeedDatabaseInMainBundle managedObjectModel:(NSManagedObjectModel*)nilOrManagedObjectModel;
+- (id)initWithStoreFilename:(NSString *)storeFilename inDirectory:(NSString *)nilOrDirectoryPath usingSeedDatabaseName:(NSString *)nilOrNameOfSeedDatabaseInMainBundle managedObjectModel:(NSManagedObjectModel*)nilOrManagedObjectModel;
 - (void)createPersistentStoreCoordinator;
 - (void)createStoreIfNecessaryUsingSeedDatabase:(NSString*)seedDatabase;
 - (NSString *)applicationDocumentsDirectory;
@@ -22,7 +22,9 @@ static NSString* const kRKManagedObjectContextKey = @"RKManagedObjectContext";
 
 @implementation RKManagedObjectStore
 
+@synthesize delegate = _delegate;
 @synthesize storeFilename = _storeFilename;
+@synthesize pathToStoreFile = _pathToStoreFile;
 @synthesize managedObjectModel = _managedObjectModel;
 @synthesize persistentStoreCoordinator = _persistentStoreCoordinator;
 @synthesize managedObjectCache = _managedObjectCache;
@@ -32,24 +34,40 @@ static NSString* const kRKManagedObjectContextKey = @"RKManagedObjectContext";
 }
 
 + (RKManagedObjectStore*)objectStoreWithStoreFilename:(NSString *)storeFilename usingSeedDatabaseName:(NSString *)nilOrNameOfSeedDatabaseInMainBundle managedObjectModel:(NSManagedObjectModel*)nilOrManagedObjectModel {
-    return [[[self alloc] initWithStoreFilename:storeFilename usingSeedDatabaseName:nilOrNameOfSeedDatabaseInMainBundle managedObjectModel:nilOrManagedObjectModel] autorelease];
+    return [[[self alloc] initWithStoreFilename:storeFilename inDirectory:nil usingSeedDatabaseName:nilOrNameOfSeedDatabaseInMainBundle managedObjectModel:nilOrManagedObjectModel] autorelease];
+}
+
++ (RKManagedObjectStore*)objectStoreWithStoreFilename:(NSString *)storeFilename inDirectory:(NSString *)directory usingSeedDatabaseName:(NSString *)nilOrNameOfSeedDatabaseInMainBundle managedObjectModel:(NSManagedObjectModel*)nilOrManagedObjectModel {
+    return [[[self alloc] initWithStoreFilename:storeFilename inDirectory:directory usingSeedDatabaseName:nilOrNameOfSeedDatabaseInMainBundle managedObjectModel:nilOrManagedObjectModel] autorelease];
 }
 
 - (id)initWithStoreFilename:(NSString*)storeFilename {
-	return [self initWithStoreFilename:storeFilename usingSeedDatabaseName:nil managedObjectModel:nil];
+	return [self initWithStoreFilename:storeFilename inDirectory:nil usingSeedDatabaseName:nil managedObjectModel:nil];
 }
 
-- (id)initWithStoreFilename:(NSString *)storeFilename usingSeedDatabaseName:(NSString *)nilOrNameOfSeedDatabaseInMainBundle managedObjectModel:(NSManagedObjectModel*)nilOrManagedObjectModel {
+- (id)initWithStoreFilename:(NSString *)storeFilename inDirectory:(NSString *)nilOrDirectoryPath usingSeedDatabaseName:(NSString *)nilOrNameOfSeedDatabaseInMainBundle managedObjectModel:(NSManagedObjectModel*)nilOrManagedObjectModel {
     self = [self init];
 	if (self) {
 		_storeFilename = [storeFilename retain];
+		
+		if( nilOrDirectoryPath == nil ) {
+			nilOrDirectoryPath = [self applicationDocumentsDirectory];
+		}
+		else {
+			BOOL isDir;
+			NSAssert1([[NSFileManager defaultManager] fileExistsAtPath:nilOrDirectoryPath isDirectory:&isDir] && isDir == YES, @"Specified storage directory exists", nilOrDirectoryPath);
+		}
+		_pathToStoreFile = [[nilOrDirectoryPath stringByAppendingPathComponent:_storeFilename] retain];
+		
         if (nilOrManagedObjectModel == nil) {
             nilOrManagedObjectModel = [NSManagedObjectModel mergedModelFromBundles:nil];
         }
-		_managedObjectModel = [nilOrManagedObjectModel retain];        
+		_managedObjectModel = [nilOrManagedObjectModel retain];
+		
         if (nilOrNameOfSeedDatabaseInMainBundle) {
             [self createStoreIfNecessaryUsingSeedDatabase:nilOrNameOfSeedDatabaseInMainBundle];
         }
+		
 		[self createPersistentStoreCoordinator];
 	}
     
@@ -61,6 +79,8 @@ static NSString* const kRKManagedObjectContextKey = @"RKManagedObjectContext";
     
 	[_storeFilename release];
 	_storeFilename = nil;
+	[_pathToStoreFile release];
+	_pathToStoreFile = nil;
     [_managedObjectModel release];
 	_managedObjectModel = nil;
     [_persistentStoreCoordinator release];
@@ -76,28 +96,30 @@ static NSString* const kRKManagedObjectContextKey = @"RKManagedObjectContext";
  message to the application's managed object context.
  */
 - (NSError*)save {
-    NSError *error = nil;
+	NSManagedObjectContext* moc = [self managedObjectContext];
+    NSError *error;
+	
 	@try {
-		[[self managedObjectContext] save:&error];
-	}
-	@catch (NSException* e) {
-		// TODO: This needs to be reworked into a delegation pattern
-		NSString* errorMessage = [NSString stringWithFormat:@"An unrecoverable error was encountered while trying to save the database: %@", [e reason]];
-		UIAlertView* alert = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Ruh roh.", nil) 
-														message:errorMessage
-													   delegate:nil 
-											  cancelButtonTitle:NSLocalizedString(@"OK", nil) 
-											  otherButtonTitles:nil];
-		[alert show];
-		[alert release];
-	} 
-	@finally {
-		if (error) {
+		if (![moc save:&error]) {
+			if (self.delegate != nil && [self.delegate respondsToSelector:@selector(managedObjectStore:didFailToSaveContext:error:exception:)]) {
+				[self.delegate managedObjectStore:self didFailToSaveContext:moc error:error exception:nil];
+			}
+			
 			NSDictionary* userInfo = [NSDictionary dictionaryWithObject:error forKey:@"error"];
 			[[NSNotificationCenter defaultCenter] postNotificationName:RKManagedObjectStoreDidFailSaveNotification object:self userInfo:userInfo];
+			
+			return error;
 		}
-		return error;
 	}
+	@catch (NSException* e) {
+		if (self.delegate != nil && [self.delegate respondsToSelector:@selector(managedObjectStore:didFailToSaveContext:error:exception:)]) {
+			[self.delegate managedObjectStore:self didFailToSaveContext:moc error:nil exception:e];
+		}
+		else {
+			@throw;
+		}
+	}
+	return nil;
 }
 
 - (NSManagedObjectContext*)newManagedObjectContext {
@@ -113,19 +135,19 @@ static NSString* const kRKManagedObjectContextKey = @"RKManagedObjectContext";
 	return managedObjectContext;
 }
 
-- (NSString*)pathToStoreFile {
-    return [[self applicationDocumentsDirectory] stringByAppendingPathComponent:self.storeFilename];
-}
-
 - (void)createStoreIfNecessaryUsingSeedDatabase:(NSString*)seedDatabase {
-    NSError* error = nil;
     if (NO == [[NSFileManager defaultManager] fileExistsAtPath:self.pathToStoreFile]) {
         NSString* seedDatabasePath = [[NSBundle mainBundle] pathForResource:seedDatabase ofType:nil];
         NSAssert1(seedDatabasePath, @"Unable to find seed database file '%@' in the Main Bundle, aborting...", seedDatabase);
         NSLog(@"No existing database found, copying from seed path '%@'", seedDatabasePath);
-        [[NSFileManager defaultManager] copyItemAtPath:seedDatabasePath toPath:self.pathToStoreFile error:&error];
-        if (error) {
-            NSLog(@"Encountered an error during seed database copy: %@", [error localizedDescription]);
+		
+		NSError* error;
+        if (![[NSFileManager defaultManager] copyItemAtPath:seedDatabasePath toPath:self.pathToStoreFile error:&error]) {
+			if (self.delegate != nil && [self.delegate respondsToSelector:@selector(managedObjectStore:didFailToCopySeedDatabase:error:)]) {
+				[self.delegate managedObjectStore:self didFailToCopySeedDatabase:seedDatabase error:error];
+			} else {
+				NSLog(@"Encountered an error during seed database copy: %@", [error localizedDescription]);
+			}
         }
         NSAssert1([[NSFileManager defaultManager] fileExistsAtPath:seedDatabasePath], @"Seed database not found at path '%@'!", seedDatabasePath);
     }
@@ -143,24 +165,30 @@ static NSString* const kRKManagedObjectContextKey = @"RKManagedObjectContext";
 							 [NSNumber numberWithBool:YES], NSInferMappingModelAutomaticallyOption, nil];
 	
 	if (![_persistentStoreCoordinator addPersistentStoreWithType:NSSQLiteStoreType configuration:nil URL:storeUrl options:options error:&error]) {
-		// TODO: Needs to be handled with delegation... Allow the application to handle migration.
+		if (self.delegate != nil && [self.delegate respondsToSelector:@selector(managedObjectStore:didFailToCreatePersistentStoreCoordinatorWithError:)]) {
+			[self.delegate managedObjectStore:self didFailToCreatePersistentStoreCoordinatorWithError:error];
+		}
+		else {
+			NSAssert(NO, @"Managed object store failed to create persistent store coordinator: %@", error);
+		}
     }
 }
 
-- (void)deletePersistantStore {
+- (void)deletePersistantStoreUsingSeedDatabaseName:(NSString *)seedFile {
 	NSURL* storeUrl = [NSURL fileURLWithPath:self.pathToStoreFile];
-	NSError* error = nil;
-	NSLog(@"Error removing persistant store: %@", [error localizedDescription]);
-	if (error) {
-		//Handle error
-	}
-	error = nil;
-	[[NSFileManager defaultManager] removeItemAtPath:storeUrl.path error:&error];
-	if (error) {
-		//Handle error
+	
+	NSError* error;
+	if (![[NSFileManager defaultManager] removeItemAtPath:storeUrl.path error:&error]) {
+		if (self.delegate != nil && [self.delegate respondsToSelector:@selector(managedObjectStore:didFailToDeletePersistentStore:error:)]) {
+			[self.delegate managedObjectStore:self didFailToDeletePersistentStore:self.pathToStoreFile error:error];
+		}
+		else {
+			NSAssert(NO, @"Managed object store failed to delete persistent store : %@", error);
+		}
 	}
 	
 	[_persistentStoreCoordinator release];
+	_persistentStoreCoordinator = nil;
 	
 	// Clear the current managed object context. Will be re-created next time it is accessed.
 	NSMutableDictionary* threadDictionary = [[NSThread currentThread] threadDictionary];
@@ -168,7 +196,14 @@ static NSString* const kRKManagedObjectContextKey = @"RKManagedObjectContext";
         [threadDictionary removeObjectForKey:kRKManagedObjectContextKey];
     }
 	
+	if (seedFile)
+		[self createStoreIfNecessaryUsingSeedDatabase:seedFile];
+
 	[self createPersistentStoreCoordinator];
+}
+
+- (void)deletePersistantStore {
+	[self deletePersistantStoreUsingSeedDatabaseName:nil];
 }
 
 /**
@@ -260,7 +295,7 @@ static NSString* const kRKManagedObjectContextKey = @"RKManagedObjectContext";
 			NSFetchRequest* fetchRequest = [class fetchRequest];
 			[fetchRequest setReturnsObjectsAsFaults:NO];			
 			objects = [class objectsWithFetchRequest:fetchRequest];
-			NSLog(@"Cacheing all %d %@ objects to thread local storage", [objects count], class);
+			NSLog(@"Caching all %d %@ objects to thread local storage", [objects count], class);
 			NSMutableDictionary* dictionary = [NSMutableDictionary dictionary];
 			NSString* primaryKey = [class performSelector:@selector(primaryKeyProperty)];
 			for (id theObject in objects) {			
