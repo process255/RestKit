@@ -225,7 +225,6 @@ static const NSString* kRKModelMapperRailsDateFormatString = @"MM/dd/yyyy";
     Class objectClass = nil;
     NSString* matchedKeyPath = nil;
     for (NSString* keyPath in [_elementToClassMappings allKeys]) {
-        NSLog(@"Checking for keyPath %@ in %@", keyPath, dictionary);
         if ([dictionary valueForKeyPath:keyPath]) {
             if (objectClass) {
                 // TODO: Factor out this log warning and use a self.logger so that we can unit test logging...
@@ -239,7 +238,7 @@ static const NSString* kRKModelMapperRailsDateFormatString = @"MM/dd/yyyy";
     }
     
     if (!objectClass) {
-        NSLog(@"Unable to find registered mapping keyPath in payload, returning nil...");
+//        NSLog(@"Unable to find registered mapping keyPath in payload, returning nil...");
         return nil;
     }
     
