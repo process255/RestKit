@@ -71,6 +71,12 @@
     }
 }
 
+- (BOOL)connectionShouldUseCredentialStorage:(NSURLConnection 
+                                              *)connection 
+{ 
+    return NO; 
+} 
+
 - (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data {
 	[_body appendData:data];
 }
