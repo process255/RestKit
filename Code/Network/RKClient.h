@@ -11,6 +11,7 @@
 #import "RKResponse.h"
 #import "NSDictionary+RKRequestSerialization.h"
 #import "RKReachabilityObserver.h"
+#import "RKRequestCache.h"
 
 /////////////////////////////////////////////////////////////////////////
 
@@ -54,7 +55,7 @@ NSString* RKMakePathWithObject(NSString* path, id object);
  *
  * This is a convenience method for constructing a new resource path that includes a query. For example,
  * when given a resourcePath of /contacts and a dictionary of parameters containing foo=bar and color=red,
- * will return /contacts?foo=bar&color=red
+ * will return /contacts?foo=bar&amp;color=red
  *
  * *NOTE* - Assumes that the resource path does not already contain any query parameters.
  *
@@ -121,11 +122,16 @@ NSString* RKPathAppendQueryParams(NSString* resourcePath, NSDictionary* queryPar
 	NSString* _baseURL;
 	NSString* _username;
 	NSString* _password;
+    BOOL _forceBasicAuthentication;
 	NSMutableDictionary* _HTTPHeaders;
 	RKReachabilityObserver* _baseURLReachabilityObserver;
 	NSString* _serviceUnavailableAlertTitle;
 	NSString* _serviceUnavailableAlertMessage;
 	BOOL _serviceUnavailableAlertEnabled;
+	RKRequestCache* _cache;
+	RKRequestCachePolicy _cachePolicy;
+    NSMutableSet *_additionalRootCertificates;
+    BOOL _disableCertificateValidation;
 }
 
 /////////////////////////////////////////////////////////////////////////
@@ -141,6 +147,22 @@ NSString* RKPathAppendQueryParams(NSString* resourcePath, NSDictionary* queryPar
  * A dictionary of headers to be sent with each request
  */
 @property(nonatomic, readonly) NSMutableDictionary* HTTPHeaders;
+
+#ifdef RESTKIT_SSL_VALIDATION
+/**
+ * A set of additional certificates to be used in evaluating server
+ * SSL certificates.
+ */
+@property(nonatomic, readonly) NSSet* additionalRootCertificates;
+#endif
+
+/**
+ * Accept all SSL certificates. This is a potential security exposure,
+ * and should be used ONLY while debugging in a controlled environment.
+ *
+ * *Default*: _NO_
+ */
+@property(nonatomic, assign) BOOL disableCertificateValidation;
 
 /**
  *  Will check for network connectivity to the host specified in the baseURL
@@ -160,6 +182,16 @@ NSString* RKPathAppendQueryParams(NSString* resourcePath, NSDictionary* queryPar
  */
 - (void)setValue:(NSString*)value forHTTPHeaderField:(NSString*)header;
 
+#ifdef RESTKIT_SSL_VALIDATION
+/**
+ * Adds an additional certificate that will be used to evaluate server SSL certs
+ *
+ * @param cert The HTTP header to add
+ * @see additionalRootCertificates
+ */
+- (void)addRootCertificate:(SecCertificateRef)cert;
+#endif
+
 /////////////////////////////////////////////////////////////////////////
 /// @name HTTP Authentication
 /////////////////////////////////////////////////////////////////////////
@@ -173,6 +205,15 @@ NSString* RKPathAppendQueryParams(NSString* resourcePath, NSDictionary* queryPar
  * The password to use for authentication via HTTP AUTH
  */
 @property(nonatomic, retain) NSString* password;
+
+/**
+ When YES, RKRequest objects dispatched through the client will have an HTTP Basic
+ Authorization header added before being sent.
+ 
+ This avoids an HTTP AUTH challenge before authentication and can be used to force
+ authentication is situations where an AUTH challenge is not issued
+ */
+@property(nonatomic, assign) BOOL forceBasicAuthentication;
 
 /**
  * The RKReachabilityObserver used to monitor whether or not the client has a connection
@@ -214,6 +255,24 @@ NSString* RKPathAppendQueryParams(NSString* resourcePath, NSDictionary* queryPar
  */
 @property(nonatomic, assign) BOOL serviceUnavailableAlertEnabled;
 
+/**
+ An instance of the request cache used to store/load cacheable responses for requests
+ sent through this client
+ */
+@property (nonatomic, retain) RKRequestCache* cache;
+
+/**
+ The default cache policy to apply for all requests sent through this client
+ 
+ @see RKRequestCache
+ */
+@property (nonatomic, assign) RKRequestCachePolicy cachePolicy;
+
+/**
+ The path used to store response data for this client's request cache
+ */
+@property (nonatomic, readonly) NSString* cachePath;
+
 /////////////////////////////////////////////////////////////////////////
 /// @name Shared Client Instance
 /////////////////////////////////////////////////////////////////////////
@@ -254,6 +313,15 @@ NSString* RKPathAppendQueryParams(NSString* resourcePath, NSDictionary* queryPar
  */
 + (RKClient*)clientWithBaseURL:(NSString*)baseURL username:(NSString*)username password:(NSString*)password;
 
+/**
+ * Return a client scoped to a particular base URL. If the singleton client is nil, the return client is set as the singleton
+ *
+ * @param baseURL The baseURL to set for the client. All requests will be relative to this base URL
+ * @see baseURL
+ * @return A configured RKClient instance ready to send requests
+ */
+- (id)initWithBaseURL:(NSString*)baseURL;
+
 /////////////////////////////////////////////////////////////////////////
 /// @name Constructing Resource Paths and URLs
 /////////////////////////////////////////////////////////////////////////
@@ -279,7 +347,7 @@ NSString* RKPathAppendQueryParams(NSString* resourcePath, NSDictionary* queryPar
  *
  * This is a convenience method for constructing a new resource path that includes a query. For example,
  * when given a resourcePath of /contacts and a dictionary of parameters containing foo=bar and color=red,
- * will return /contacts?foo=bar&color=red
+ * will return /contacts?foo=bar&amp;color=red
  *
  * *NOTE* - Assumes that the resource path does not already contain any query parameters.
  *
@@ -297,7 +365,7 @@ NSString* RKPathAppendQueryParams(NSString* resourcePath, NSDictionary* queryPar
  *
  * This is a convenience method for constructing a new resource path that includes a query. For example,
  * when given a resourcePath of /contacts and a dictionary of parameters containing foo=bar and color=red,
- * will return /contacts?foo=bar&color=red
+ * will return /contacts?foo=bar&amp;color=red
  *
  * *NOTE* - Assumes that the resource path does not already contain any query parameters.
  *

@@ -20,9 +20,26 @@
     if (self) {
         RKObjectManager* objectManager = [RKObjectManager objectManagerWithBaseURL:gRKCatalogBaseURL];
         objectManager.objectStore = [RKManagedObjectStore objectStoreWithStoreFilename:@"RKRelationshipMappingExample.sqlite"];
-        [objectManager registerClass:[User class] forElementNamed:@"user"];
-        [objectManager registerClass:[Project class] forElementNamed:@"project"];
-        [objectManager registerClass:[Task class] forElementNamed:@"tasks"];
+        
+        RKManagedObjectMapping* taskMapping = [RKManagedObjectMapping mappingForClass:[Task class]];
+        [taskMapping mapKeyPath:@"id" toAttribute:@"taskID"];
+        [taskMapping mapKeyPath:@"name" toAttribute:@"name"];
+        [taskMapping mapKeyPath:@"assigned_user_id" toAttribute:@"assignedUserID"];
+        [objectManager.mappingProvider setMapping:taskMapping forKeyPath:@"task"];
+        
+        RKManagedObjectMapping* userMapping = [RKManagedObjectMapping mappingForClass:[User class]];
+        [userMapping mapAttributes:@"name", @"email", nil];
+        [userMapping mapKeyPath:@"id" toAttribute:@"userID"];
+        [userMapping mapRelationship:@"tasks" withMapping:taskMapping];
+        [objectManager.mappingProvider setMapping:userMapping forKeyPath:@"user"];
+        
+        // NOTE - Project is not backed by Core Data
+        RKObjectMapping* projectMapping = [RKObjectMapping mappingForClass:[Project class]];
+        [projectMapping mapKeyPath:@"id" toAttribute:@"projectID"];
+        [projectMapping mapAttributes:@"name", @"description", nil];
+        [projectMapping mapRelationship:@"user" withMapping:userMapping];
+        [projectMapping mapRelationship:@"tasks" withMapping:taskMapping];
+        [objectManager.mappingProvider setMapping:projectMapping forKeyPath:@"project"];
     }
     
     return self;
@@ -84,7 +101,7 @@
         label.text = @"Tasks";
     }
 
-    return label;
+    return [label autorelease];
 }
 
 #pragma mark - Table View Selection

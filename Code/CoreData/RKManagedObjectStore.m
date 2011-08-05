@@ -8,12 +8,19 @@
 
 #import "RKManagedObjectStore.h"
 #import "RKAlert.h"
+#import "NSManagedObject+ActiveRecord.h"
+#import "RKLog.h"
+
+// Set Logging Component
+#undef RKLogComponent
+#define RKLogComponent lcl_cRestKitCoreData
 
 NSString* const RKManagedObjectStoreDidFailSaveNotification = @"RKManagedObjectStoreDidFailSaveNotification";
-static NSString* const kRKManagedObjectContextKey = @"RKManagedObjectContext";
+static NSString* const RKManagedObjectStoreThreadDictionaryContextKey = @"RKManagedObjectStoreThreadDictionaryContextKey";
+static NSString* const RKManagedObjectStoreThreadDictionaryEntityCacheKey = @"RKManagedObjectStoreThreadDictionaryEntityCacheKey";
 
 @interface RKManagedObjectStore (Private)
-- (id)initWithStoreFilename:(NSString *)storeFilename inDirectory:(NSString *)nilOrDirectoryPath usingSeedDatabaseName:(NSString *)nilOrNameOfSeedDatabaseInMainBundle managedObjectModel:(NSManagedObjectModel*)nilOrManagedObjectModel;
+- (id)initWithStoreFilename:(NSString *)storeFilename inDirectory:(NSString *)nilOrDirectoryPath usingSeedDatabaseName:(NSString *)nilOrNameOfSeedDatabaseInMainBundle managedObjectModel:(NSManagedObjectModel*)nilOrManagedObjectModel delegate:(id)delegate;
 - (void)createPersistentStoreCoordinator;
 - (void)createStoreIfNecessaryUsingSeedDatabase:(NSString*)seedDatabase;
 - (NSString *)applicationDocumentsDirectory;
@@ -30,37 +37,37 @@ static NSString* const kRKManagedObjectContextKey = @"RKManagedObjectContext";
 @synthesize managedObjectCache = _managedObjectCache;
 
 + (RKManagedObjectStore*)objectStoreWithStoreFilename:(NSString*)storeFilename {
-    return [self objectStoreWithStoreFilename:storeFilename usingSeedDatabaseName:nil managedObjectModel:nil];
+    return [self objectStoreWithStoreFilename:storeFilename usingSeedDatabaseName:nil managedObjectModel:nil delegate:nil];
 }
 
-+ (RKManagedObjectStore*)objectStoreWithStoreFilename:(NSString *)storeFilename usingSeedDatabaseName:(NSString *)nilOrNameOfSeedDatabaseInMainBundle managedObjectModel:(NSManagedObjectModel*)nilOrManagedObjectModel {
-    return [[[self alloc] initWithStoreFilename:storeFilename inDirectory:nil usingSeedDatabaseName:nilOrNameOfSeedDatabaseInMainBundle managedObjectModel:nilOrManagedObjectModel] autorelease];
++ (RKManagedObjectStore*)objectStoreWithStoreFilename:(NSString *)storeFilename usingSeedDatabaseName:(NSString *)nilOrNameOfSeedDatabaseInMainBundle managedObjectModel:(NSManagedObjectModel*)nilOrManagedObjectModel delegate:(id)delegate {
+    return [[[self alloc] initWithStoreFilename:storeFilename inDirectory:nil usingSeedDatabaseName:nilOrNameOfSeedDatabaseInMainBundle managedObjectModel:nilOrManagedObjectModel delegate:delegate] autorelease];
 }
 
-+ (RKManagedObjectStore*)objectStoreWithStoreFilename:(NSString *)storeFilename inDirectory:(NSString *)directory usingSeedDatabaseName:(NSString *)nilOrNameOfSeedDatabaseInMainBundle managedObjectModel:(NSManagedObjectModel*)nilOrManagedObjectModel {
-    return [[[self alloc] initWithStoreFilename:storeFilename inDirectory:directory usingSeedDatabaseName:nilOrNameOfSeedDatabaseInMainBundle managedObjectModel:nilOrManagedObjectModel] autorelease];
++ (RKManagedObjectStore*)objectStoreWithStoreFilename:(NSString *)storeFilename inDirectory:(NSString *)directory usingSeedDatabaseName:(NSString *)nilOrNameOfSeedDatabaseInMainBundle managedObjectModel:(NSManagedObjectModel*)nilOrManagedObjectModel delegate:(id)delegate {
+    return [[[self alloc] initWithStoreFilename:storeFilename inDirectory:directory usingSeedDatabaseName:nilOrNameOfSeedDatabaseInMainBundle managedObjectModel:nilOrManagedObjectModel delegate:delegate] autorelease];
 }
 
 - (id)initWithStoreFilename:(NSString*)storeFilename {
-	return [self initWithStoreFilename:storeFilename inDirectory:nil usingSeedDatabaseName:nil managedObjectModel:nil];
+	return [self initWithStoreFilename:storeFilename inDirectory:nil usingSeedDatabaseName:nil managedObjectModel:nil delegate:nil];
 }
 
-- (id)initWithStoreFilename:(NSString *)storeFilename inDirectory:(NSString *)nilOrDirectoryPath usingSeedDatabaseName:(NSString *)nilOrNameOfSeedDatabaseInMainBundle managedObjectModel:(NSManagedObjectModel*)nilOrManagedObjectModel {
+- (id)initWithStoreFilename:(NSString *)storeFilename inDirectory:(NSString *)nilOrDirectoryPath usingSeedDatabaseName:(NSString *)nilOrNameOfSeedDatabaseInMainBundle managedObjectModel:(NSManagedObjectModel*)nilOrManagedObjectModel delegate:(id)delegate {
     self = [self init];
 	if (self) {
 		_storeFilename = [storeFilename retain];
 		
-		if( nilOrDirectoryPath == nil ) {
+		if (nilOrDirectoryPath == nil) {
 			nilOrDirectoryPath = [self applicationDocumentsDirectory];
-		}
-		else {
+		} else {
 			BOOL isDir;
 			NSAssert1([[NSFileManager defaultManager] fileExistsAtPath:nilOrDirectoryPath isDirectory:&isDir] && isDir == YES, @"Specified storage directory exists", nilOrDirectoryPath);
 		}
 		_pathToStoreFile = [[nilOrDirectoryPath stringByAppendingPathComponent:_storeFilename] retain];
 		
         if (nilOrManagedObjectModel == nil) {
-            nilOrManagedObjectModel = [NSManagedObjectModel mergedModelFromBundles:nil];
+            // NOTE: allBundles permits Core Data setup in unit tests
+			nilOrManagedObjectModel = [NSManagedObjectModel mergedModelFromBundles:[NSBundle allBundles]];
         }
 		_managedObjectModel = [nilOrManagedObjectModel retain];
 		
@@ -68,19 +75,34 @@ static NSString* const kRKManagedObjectContextKey = @"RKManagedObjectContext";
             [self createStoreIfNecessaryUsingSeedDatabase:nilOrNameOfSeedDatabaseInMainBundle];
         }
 		
+        _delegate = delegate;
+        
 		[self createPersistentStoreCoordinator];
 	}
     
 	return self;
 }
 
+- (void)clearThreadLocalStorage {
+    // Clear out our Thread local information
+	NSMutableDictionary* threadDictionary = [[NSThread currentThread] threadDictionary];
+    if ([threadDictionary objectForKey:RKManagedObjectStoreThreadDictionaryContextKey]) {
+        [threadDictionary removeObjectForKey:RKManagedObjectStoreThreadDictionaryContextKey];
+    }
+    if ([threadDictionary objectForKey:RKManagedObjectStoreThreadDictionaryEntityCacheKey]) {
+        [threadDictionary removeObjectForKey:RKManagedObjectStoreThreadDictionaryEntityCacheKey];
+    }
+}
+
 - (void)dealloc {
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
+    [self clearThreadLocalStorage];
     
 	[_storeFilename release];
 	_storeFilename = nil;
 	[_pathToStoreFile release];
 	_pathToStoreFile = nil;
+    
     [_managedObjectModel release];
 	_managedObjectModel = nil;
     [_persistentStoreCoordinator release];
@@ -97,7 +119,7 @@ static NSString* const kRKManagedObjectContextKey = @"RKManagedObjectContext";
  */
 - (NSError*)save {
 	NSManagedObjectContext* moc = [self managedObjectContext];
-    NSError *error;
+    NSError *error = nil;
 	
 	@try {
 		if (![moc save:&error]) {
@@ -139,14 +161,14 @@ static NSString* const kRKManagedObjectContextKey = @"RKManagedObjectContext";
     if (NO == [[NSFileManager defaultManager] fileExistsAtPath:self.pathToStoreFile]) {
         NSString* seedDatabasePath = [[NSBundle mainBundle] pathForResource:seedDatabase ofType:nil];
         NSAssert1(seedDatabasePath, @"Unable to find seed database file '%@' in the Main Bundle, aborting...", seedDatabase);
-        NSLog(@"No existing database found, copying from seed path '%@'", seedDatabasePath);
+        RKLogInfo(@"No existing database found, copying from seed path '%@'", seedDatabasePath);
 		
 		NSError* error;
         if (![[NSFileManager defaultManager] copyItemAtPath:seedDatabasePath toPath:self.pathToStoreFile error:&error]) {
 			if (self.delegate != nil && [self.delegate respondsToSelector:@selector(managedObjectStore:didFailToCopySeedDatabase:error:)]) {
 				[self.delegate managedObjectStore:self didFailToCopySeedDatabase:seedDatabase error:error];
 			} else {
-				NSLog(@"Encountered an error during seed database copy: %@", [error localizedDescription]);
+				RKLogError(@"Encountered an error during seed database copy: %@", [error localizedDescription]);
 			}
         }
         NSAssert1([[NSFileManager defaultManager] fileExistsAtPath:seedDatabasePath], @"Seed database not found at path '%@'!", seedDatabasePath);
@@ -167,8 +189,7 @@ static NSString* const kRKManagedObjectContextKey = @"RKManagedObjectContext";
 	if (![_persistentStoreCoordinator addPersistentStoreWithType:NSSQLiteStoreType configuration:nil URL:storeUrl options:options error:&error]) {
 		if (self.delegate != nil && [self.delegate respondsToSelector:@selector(managedObjectStore:didFailToCreatePersistentStoreCoordinatorWithError:)]) {
 			[self.delegate managedObjectStore:self didFailToCreatePersistentStoreCoordinatorWithError:error];
-		}
-		else {
+		} else {
 			NSAssert(NO, @"Managed object store failed to create persistent store coordinator: %@", error);
 		}
     }
@@ -190,14 +211,11 @@ static NSString* const kRKManagedObjectContextKey = @"RKManagedObjectContext";
 	[_persistentStoreCoordinator release];
 	_persistentStoreCoordinator = nil;
 	
-	// Clear the current managed object context. Will be re-created next time it is accessed.
-	NSMutableDictionary* threadDictionary = [[NSThread currentThread] threadDictionary];
-    if ([threadDictionary objectForKey:kRKManagedObjectContextKey]) {
-        [threadDictionary removeObjectForKey:kRKManagedObjectContextKey];
-    }
+	[self clearThreadLocalStorage];
 	
-	if (seedFile)
-		[self createStoreIfNecessaryUsingSeedDatabase:seedFile];
+	if (seedFile) {
+        [self createStoreIfNecessaryUsingSeedDatabase:seedFile];
+    }
 
 	[self createPersistentStoreCoordinator];
 }
@@ -214,13 +232,14 @@ static NSString* const kRKManagedObjectContextKey = @"RKManagedObjectContext";
  */
 -(NSManagedObjectContext*)managedObjectContext {
 	NSMutableDictionary* threadDictionary = [[NSThread currentThread] threadDictionary];
-	NSManagedObjectContext* backgroundThreadContext = [threadDictionary objectForKey:kRKManagedObjectContextKey];
+	NSManagedObjectContext* backgroundThreadContext = [threadDictionary objectForKey:RKManagedObjectStoreThreadDictionaryContextKey];
 	if (!backgroundThreadContext) {
-		backgroundThreadContext = [self newManagedObjectContext];					
-		[threadDictionary setObject:backgroundThreadContext forKey:kRKManagedObjectContextKey];			
+		backgroundThreadContext = [self newManagedObjectContext];
+		[threadDictionary setObject:backgroundThreadContext forKey:RKManagedObjectStoreThreadDictionaryContextKey];
 		[backgroundThreadContext release];
-		
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(mergeChanges:)
+
+		[[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(mergeChanges:)
 													 name:NSManagedObjectContextDidSaveNotification
 												   object:backgroundThreadContext];
 	}
@@ -230,8 +249,8 @@ static NSString* const kRKManagedObjectContextKey = @"RKManagedObjectContext";
 - (void)mergeChangesOnMainThreadWithNotification:(NSNotification*)notification {
 	assert([NSThread isMainThread]);
 	[self.managedObjectContext performSelectorOnMainThread:@selector(mergeChangesFromContextDidSaveNotification:)
-											withObject:notification
-										 waitUntilDone:YES];
+												withObject:notification
+											 waitUntilDone:YES];
 }
 
 - (void)mergeChanges:(NSNotification *)notification {
@@ -285,37 +304,54 @@ static NSString* const kRKManagedObjectContextKey = @"RKManagedObjectContext";
 	return objectArray;
 }
 
-- (RKManagedObject*)findOrCreateInstanceOfManagedObject:(Class)class withPrimaryKeyValue:(id)primaryKeyValue {
-	RKManagedObject* object = nil;
-	if ([class respondsToSelector:@selector(allObjects)]) {
-		NSArray* objects = nil;
-		NSMutableDictionary* threadDictionary = [[NSThread currentThread] threadDictionary];
-		
-		if (nil == [threadDictionary objectForKey:class]) {
-			NSFetchRequest* fetchRequest = [class fetchRequest];
-			[fetchRequest setReturnsObjectsAsFaults:NO];			
-			objects = [class objectsWithFetchRequest:fetchRequest];
-			NSLog(@"Caching all %d %@ objects to thread local storage", [objects count], class);
-			NSMutableDictionary* dictionary = [NSMutableDictionary dictionary];
-			NSString* primaryKey = [class performSelector:@selector(primaryKeyProperty)];
-			for (id theObject in objects) {			
-				id primaryKeyValue = [theObject valueForKey:primaryKey];
-				if (primaryKeyValue) {
-					[dictionary setObject:theObject forKey:primaryKeyValue];
-				}
-			}
-			
-			[threadDictionary setObject:dictionary forKey:class];
-		}
-		
-		NSMutableDictionary* dictionary = [threadDictionary objectForKey:class];
-		object = [dictionary objectForKey:primaryKeyValue];
-		
-		if (object == nil && primaryKeyValue && [class respondsToSelector:@selector(object)]) {
-			object = [class object];
-			[dictionary setObject:object forKey:primaryKeyValue];
-		}
-	}
+- (NSManagedObject*)findOrCreateInstanceOfEntity:(NSEntityDescription*)entity withPrimaryKeyAttribute:(NSString*)primaryKeyAttribute andValue:(id)primaryKeyValue {
+    NSAssert(entity, @"Cannot instantiate managed object without a target class");
+    NSAssert(primaryKeyAttribute, @"Cannot find existing managed object instance without a primary key attribute");
+    NSAssert(primaryKeyValue, @"Cannot find existing managed object by primary key without a value");
+	NSManagedObject* object = nil;
+    
+    // NOTE: We coerce the primary key into a string (if possible) for convenience. Generally
+    // primary keys are expressed either as a number of a string, so this lets us support either case interchangeably
+    id lookupValue = [primaryKeyValue respondsToSelector:@selector(stringValue)] ? [primaryKeyValue stringValue] : primaryKeyValue;
+    NSArray* objects = nil;
+    NSString* entityName = entity.name;
+    NSMutableDictionary* threadDictionary = [[NSThread currentThread] threadDictionary];
+    
+    if (nil == [threadDictionary objectForKey:RKManagedObjectStoreThreadDictionaryEntityCacheKey]) {
+        [threadDictionary setObject:[NSMutableDictionary dictionary] forKey:RKManagedObjectStoreThreadDictionaryEntityCacheKey];
+    }
+    
+    // Construct the cache if necessary
+    NSMutableDictionary* entityCache = [threadDictionary objectForKey:RKManagedObjectStoreThreadDictionaryEntityCacheKey];
+    if (nil == [entityCache objectForKey:entityName]) {
+        NSFetchRequest* fetchRequest = [[[NSFetchRequest alloc] init] autorelease];
+        [fetchRequest setEntity:entity];
+        [fetchRequest setReturnsObjectsAsFaults:NO];			
+        objects = [NSManagedObject executeFetchRequest:fetchRequest];
+        RKLogInfo(@"Caching all %d %@ objects to thread local storage", [objects count], entity.name);
+        NSMutableDictionary* dictionary = [NSMutableDictionary dictionary];
+        BOOL coerceToString = [[[objects lastObject] valueForKey:primaryKeyAttribute] respondsToSelector:@selector(stringValue)];
+        for (id theObject in objects) {			
+            id attributeValue = [theObject valueForKey:primaryKeyAttribute];
+            // Coerce to a string if possible
+            attributeValue = coerceToString ? [attributeValue stringValue] : attributeValue;
+            if (attributeValue) {
+                [dictionary setObject:theObject forKey:attributeValue];
+            }
+        }
+        
+        [entityCache setObject:dictionary forKey:entityName];
+    }
+    
+    NSMutableDictionary* dictionary = [entityCache objectForKey:entityName];
+    NSAssert1(dictionary, @"Thread local cache of %@ objects should not be nil", entityName);
+    object = [dictionary objectForKey:lookupValue];
+    
+    if (object == nil) {
+        object = [[[NSManagedObject alloc] initWithEntity:entity insertIntoManagedObjectContext:self.managedObjectContext] autorelease];
+        [dictionary setObject:object forKey:lookupValue];
+    }
+        
 	return object;
 }
 
@@ -324,7 +360,7 @@ static NSString* const kRKManagedObjectContextKey = @"RKManagedObjectContext";
     
     if (self.managedObjectCache) {
         NSArray* cacheFetchRequests = [self.managedObjectCache fetchRequestsForResourcePath:resourcePath];
-        cachedObjects = [RKManagedObject objectsWithFetchRequests:cacheFetchRequests];
+        cachedObjects = [NSManagedObject objectsWithFetchRequests:cacheFetchRequests];
     }
     
     return cachedObjects;

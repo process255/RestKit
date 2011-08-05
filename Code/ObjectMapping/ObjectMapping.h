@@ -7,5 +7,10 @@
 //
 
 #import "RKObjectManager.h"
-#import "RKObject.h"
 #import "RKObjectLoader.h"
+#import "RKObjectMapping.h"
+#import "RKObjectSerializer.h"
+#import "RKObjectMappingProvider.h"
+#import "RKObjectMappingResult.h"
+#import "RKObjectMapper.h"
+#import "RKParserRegistry.h"

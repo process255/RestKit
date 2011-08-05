@@ -7,7 +7,6 @@
 //
 
 #import <CoreData/CoreData.h>
-#import "RKManagedObject.h"
 #import "RKManagedObjectCache.h"
 
 @class RKManagedObjectStore;
@@ -80,7 +79,7 @@ extern NSString* const RKManagedObjectStoreDidFailSaveNotification;
  * copying the seed database from the main bundle. If the managed object model provided is nil,
  * all models will be merged from the main bundle for you.
  */
-+ (RKManagedObjectStore*)objectStoreWithStoreFilename:(NSString *)storeFilename usingSeedDatabaseName:(NSString *)nilOrNameOfSeedDatabaseInMainBundle managedObjectModel:(NSManagedObjectModel*)nilOrManagedObjectModel;
++ (RKManagedObjectStore*)objectStoreWithStoreFilename:(NSString *)storeFilename usingSeedDatabaseName:(NSString *)nilOrNameOfSeedDatabaseInMainBundle managedObjectModel:(NSManagedObjectModel*)nilOrManagedObjectModel delegate:(id)delegate;
 
 /**
  * Initialize a new managed object store backed by a SQLite database with the specified filename,
@@ -89,7 +88,7 @@ extern NSString* const RKManagedObjectStoreDidFailSaveNotification;
  * the store by copying the seed database from the main bundle. If the managed object model
  * provided is nil, all models will be merged from the main bundle for you.
  */
-+ (RKManagedObjectStore*)objectStoreWithStoreFilename:(NSString *)storeFilename inDirectory:(NSString *)directory usingSeedDatabaseName:(NSString *)nilOrNameOfSeedDatabaseInMainBundle managedObjectModel:(NSManagedObjectModel*)nilOrManagedObjectModel;
++ (RKManagedObjectStore*)objectStoreWithStoreFilename:(NSString *)storeFilename inDirectory:(NSString *)directory usingSeedDatabaseName:(NSString *)nilOrNameOfSeedDatabaseInMainBundle managedObjectModel:(NSManagedObjectModel*)nilOrManagedObjectModel delegate:(id)delegate;
 
 /**
  * Initialize a new managed object store with a SQLite database with the filename specified
@@ -121,12 +120,11 @@ extern NSString* const RKManagedObjectStoreDidFailSaveNotification;
 - (NSArray*)objectsWithIDs:(NSArray*)objectIDs;
 
 /**
- * Retrieves a model object from the object store given the model object's class and
- * the primaryKeyValue for the model object. This method leverages techniques specific to 
- * Core Data for optimal performance. If an existing object is not found, a new object is created
- * and returned.
+ * Retrieves a model object from the object store given a Core Data entity and
+ * the primary key attribute and value for the desired object. Internally, this method
+ * constructs a thread-local cache of managed object instances to avoid repeated fetches from the store
  */
-- (RKManagedObject*)findOrCreateInstanceOfManagedObject:(Class)class withPrimaryKeyValue:(id)primaryKeyValue;
+- (NSManagedObject*)findOrCreateInstanceOfEntity:(NSEntityDescription*)entity withPrimaryKeyAttribute:(NSString*)primaryKeyAttribute andValue:(id)primaryKeyValue;
 
 /**
  * Returns an array of objects that the 'live' at the specified resource path. Usage of this
