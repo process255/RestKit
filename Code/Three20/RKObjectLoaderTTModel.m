@@ -33,9 +33,6 @@ static NSString* const kDefaultLoadedTimeKey = @"RKRequestTTModelDefaultLoadedTi
 @synthesize objectLoader = _objectLoader;
 @synthesize refreshRate = _refreshRate;
 
-// ADDED BY SEAN DOUGHERTY ON 5.7.11
-@synthesize objectLoader = _objectLoader;
-
 + (NSDate*)defaultLoadedTime {
 	NSDate* defaultLoadedTime = [[NSUserDefaults standardUserDefaults] objectForKey:kDefaultLoadedTimeKey];
 	if (defaultLoadedTime == nil) {
@@ -87,9 +84,6 @@ static NSString* const kDefaultLoadedTimeKey = @"RKRequestTTModelDefaultLoadedTi
 }
 
 - (void)dealloc {
-    // ADDED BY SEAN DOUGHERTY ON 5.7.11
-    [_objectLoader release];
-    
 	[[RKRequestQueue sharedQueue] cancelRequestsWithDelegate:self];
 	[_objects release];
 	_objects = nil;
@@ -163,29 +157,17 @@ static NSString* const kDefaultLoadedTimeKey = @"RKRequestTTModelDefaultLoadedTi
 #pragma mark RKModelLoaderDelegate
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
-    
-    // ADDED BY SEAN DOUGHERTY ON 5.7.11
-    self.objectLoader = objectLoader;
-    
 	_isLoading = NO;
 	[self saveLoadedTime];
 	[self modelsDidLoad:objects];
 }
 
-- (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
-    
-    // ADDED BY SEAN DOUGHERTY ON 5.7.11
-    self.objectLoader = objectLoader;
-    
+- (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {    
 	_isLoading = NO;
 	[self didFailLoadWithError:error];
 }
 
-- (void)objectLoaderDidLoadUnexpectedResponse:(RKObjectLoader*)objectLoader {
-    
-    // ADDED BY SEAN DOUGHERTY ON 5.7.11
-    self.objectLoader = objectLoader;
-    
+- (void)objectLoaderDidLoadUnexpectedResponse:(RKObjectLoader*)objectLoader {  
 	_isLoading = NO;
 
     // TODO: pass error message?

@@ -73,7 +73,7 @@
     
     return self;
 }
-
+ 
 - (void)reset {
     if (_isLoading) {
         RKLogWarning(@"Request was reset while loading: %@. Canceling.", self);
@@ -183,9 +183,12 @@
     }
     
     // Add authentication headers so we don't have to deal with an extra cycle for each message requiring basic auth.
-    if (self.forceBasicAuthentication) {        
+    if (self.forceBasicAuthentication && 
+        ![_username isEqualToString:@""] &&
+        _username != nil &&
+        ![_password isEqualToString:@""] &&
+        _password != nil) {        
         CFHTTPMessageRef dummyRequest = CFHTTPMessageCreateRequest(kCFAllocatorDefault, (CFStringRef)[self HTTPMethod], (CFURLRef)[self URL], kCFHTTPVersion1_1);
-        
         CFHTTPMessageAddAuthentication(dummyRequest, nil, (CFStringRef)_username, (CFStringRef)_password,kCFHTTPAuthenticationSchemeBasic, FALSE);
         CFStringRef authorizationString = CFHTTPMessageCopyHeaderFieldValue(dummyRequest, CFSTR("Authorization"));
         [_URLRequest setValue:(NSString *)authorizationString forHTTPHeaderField:@"Authorization"];
