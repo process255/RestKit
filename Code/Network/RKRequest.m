@@ -343,7 +343,6 @@
 #endif
 	} else {
         RKLogTrace(@"Declined to dispatch request %@: shared client reported the network is not available.", self);
-        
 	    if (_cachePolicy & RKRequestCachePolicyLoadIfOffline &&
 			[self.cache hasResponseForRequest:self]) {
 

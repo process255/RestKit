@@ -388,7 +388,7 @@ static const NSTimeInterval kFlushDelay = 0.3;
     RKLogDebug(@"App is transitioning into background, suspending queue");
     
     // Suspend the queue so background requests do not trigger additional requests on state changes
-    self.suspended = YES;
+//    self.suspended = YES;
 }
 
 - (void)willTransitionToForeground {
