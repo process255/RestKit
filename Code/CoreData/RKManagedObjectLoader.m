@@ -18,6 +18,8 @@
 
 @implementation RKManagedObjectLoader
 
+@synthesize ignoreDeletes = _ignoreDeletes;
+
 - (id)init {
     self = [super init];
     if (self) {
@@ -90,7 +92,11 @@
     return [super prepareURLRequest];
 }
 
+// !!!COMMENTED OUT BY SEAN ON 7/10/12 to fix activity feed load deleting the cached objects
 - (void)deleteCachedObjectsMissingFromResult:(RKObjectMappingResult*)result {
+    if (self.ignoreDeletes) {
+        return;
+    }
     if (! [self isGET]) {
         RKLogDebug(@"Skipping cleanup of objects via managed object cache: only used for GET requests.");
         return;
@@ -100,13 +106,18 @@
         RKURL* rkURL = (RKURL*)self.URL;
         
         NSArray* results = [result asCollection];
+        
         NSArray* cachedObjects = [self.objectStore objectsForResourcePath:rkURL.resourcePath];
+        NSLog(@"results count = %d, cachedObjects count = %d", [results count], [cachedObjects count]);
+        int counter = 0;
         for (id object in cachedObjects) {
             if (NO == [results containsObject:object]) {
                 RKLogTrace(@"Deleting orphaned object %@: not found in result set and expected at this resource path", object);
                 [[self.objectStore managedObjectContext] deleteObject:object];
+                counter ++;
             }
         }
+        NSLog(@">>>>>>>>> deleted = %d", counter);
     } else {
         RKLogWarning(@"Unable to perform cleanup of server-side object deletions: unable to determine resource path.");
     } 

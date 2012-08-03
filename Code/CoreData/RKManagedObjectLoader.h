@@ -22,5 +22,6 @@
 }
 
 @property (nonatomic, readonly) RKManagedObjectStore* objectStore;
+@property (nonatomic, assign) BOOL ignoreDeletes;
 
 @end

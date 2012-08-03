@@ -1,4 +1,4 @@
-//
+    //
 //  RKManagedObjectMappingOperation.m
 //  RestKit
 //
@@ -52,12 +52,12 @@
             RKObjectRelationshipMapping* relationshipMapping = [self.objectMapping mappingForKeyPath:relationshipName];
             
             for (RKObjectRelationshipMapping* rMapping in self.objectMapping.mappings) {
-                NSLog(@"rMapping = %@", [self.objectMapping mappingForKeyPath:relationshipName]);
+//                NSLog(@"rMapping = %@", [self.objectMapping mappingForKeyPath:relationshipName]);
             }
             
             id<RKObjectMappingDefinition> mapping = relationshipMapping.mapping;
             
-            NSLog(@"relationshipName = %@, primaryKeyAttribute = %@, relationshipMapping = %@, mapping class = %@", relationshipName, primaryKeyAttribute, relationshipMapping, [mapping class]);
+//            NSLog(@"relationshipName = %@, primaryKeyAttribute = %@, relationshipMapping = %@, mapping class = %@", relationshipName, primaryKeyAttribute, relationshipMapping, [mapping class]);
             if (! [mapping isKindOfClass:[RKObjectMapping class]]) {
                 RKLogWarning(@"Can only connect relationships for RKObjectMapping relationships. Found %@: Skipping...", NSStringFromClass([mapping class]));
                 continue;
