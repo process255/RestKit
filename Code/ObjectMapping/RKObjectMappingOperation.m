@@ -98,7 +98,8 @@ BOOL RKObjectIsValueEqualToValue(id sourceValue, id destinationValue) {
     
 	NSDate* date = nil;
 	NSDateFormatter* formatter = [[NSDateFormatter alloc] init];
-    formatter.timeZone = [NSTimeZone localTimeZone];
+//    formatter.timeZone = [NSTimeZone localTimeZone];
+    formatter.timeZone = [NSTimeZone timeZoneForSecondsFromGMT:0];
 	for (NSString* formatString in self.objectMapping.dateFormatStrings) {
 		[formatter setDateFormat:formatString];
 		date = [formatter dateFromString:string];
@@ -108,6 +109,8 @@ BOOL RKObjectIsValueEqualToValue(id sourceValue, id destinationValue) {
 	}
 	
 	[formatter release];
+    
+    
 	return date;
 }
 
