@@ -136,6 +136,30 @@ transformed into one or more instances of the `Article` class. Once mappable dat
 key path should be assigned to the target object at the destination key path. This is the fundamental trick of object mapping and all other features
 are built upon this foundation.
 
+### Parameters
+
+GET query parameters should be added with the new NSString method appendQueryParameters.  For example,
+
+```objc
+- (void)loadArticlesContainingText:(NSString *)searchText {
+    NSDictionary *queryParams = [NSDictionary dictionaryWithObject:searchText forKey:@"q"];
+    NSString *resourcePath = [@"/articles" appendQueryParameters:queryParams];
+    [[RKObjectManager sharedManager] loadObjectsAtResourcePath:resourcePath delegate:self];
+}
+```
+
+POST parameters can be provided by setting the RKObjectLoader's params property:
+
+```objc
+- (void)saveArticleWithAdditionalParams:(NSDictionary *)extraPOSTParams {
+    RKObjectLoader* loader = [objectManager sendObject:human delegate:responseLoader block:^(RKObjectLoader* loader) {
+    loader.method = RKRequestMethodPOST;
+        loader.resourcePath = @"/articles/create";
+        loader.params = extraPOSTParams;
+    }];
+}
+```
+
 ## Object Mapping Fundamentals
 
 Now that we have established a foundation for the basics of object mapping, we can explore the remaining portions of the system. We'll examine
@@ -264,11 +288,10 @@ RKObjectMapping* authorMapping = [RKObjectMapping mappingForClass:[Author class]
 RKObjectMapping* articleMapping = [RKObjectMapping mappingForClass:[Article class]];
 [articleMapping mapKeyPath:@"title" toAttribute:@"title"];
 [articleMapping mapKeyPath:@"body" toAttribute:@"body"];
-[articleMapping mapKeyPath:@"author" toAttribute:@"author"];
 [articleMapping mapKeyPath:@"publication_date" toAttribute:@"publicationDate"];
 
 // Define the relationship mapping
-[article mapKeyPath:@"author" toRelationship:@"author" withMapping:authorMapping];
+[articleMapping mapKeyPath:@"author" toRelationship:@"author" withMapping:authorMapping];
 
 [[RKObjectManager sharedManager].mappingProvider setMapping:articleMapping forKeyPath:@"articles"];
 ```
@@ -461,7 +484,6 @@ take a look at how this works:
 
 ```objc
 #import <RestKit/RestKit.h>
-#import <RestKit/CoreData/CoreData.h>
 
 RKObjectManager* objectManager = [RKObjectManager managerWithBaseURL:@"http://restkit.org"];
 RKManagedObjectStore* objectStore = [RKManagedObjectStore objectStoreWithStoreFilename:@"MyApp.sqlite"];
@@ -499,6 +521,7 @@ articleMapping.primaryKeyAttribute = @"articleID";
 ```
 
 The astute reader will notice a couple of things:
+
 1. We changed our inheritance to NSManagedObject from NSObject
 1. Our properties are now implemented via @dynamic instead of @synthesize
 1. We have added a new property -- articleID. Typically when you load a remote object it is going to include a unique
@@ -535,7 +558,7 @@ We might have a User class like the following:
 @end
 ```
 
-You will note that this JSON is problematic compared to our earlier examples because the `email` attribute's data
+You will note that this JSON is problematic compared to our earlier examples because the `username` attribute's data
 exists as the key in a dictionary, rather than a value. We handle this by creating an object mapping and using a new
 type of mapping definition:
 
@@ -543,11 +566,11 @@ type of mapping definition:
 RKObjectMapping* mapping = [RKObjectMapping mappingForClass:[User class]];
 [mapping mapKeyOfNestedDictionaryToAttribute:@"username"];
 [mapping mapFromKeyPath:@"(username).email" toAttribute:"email"];
-[mapping mapFromKeyPath:@"(username).favoriteAnimal" toAttribute:"favoriteAnimal"];
+[mapping mapFromKeyPath:@"(username).favorite_animal" toAttribute:"favoriteAnimal"];
 ```
 
 What happens with this type of object mapping is that when applied against a dictionary of data,
-the keys are interpreted to contain the value for the nesting attribute (so "blake" becomes username). When
+the keys are interpreted to contain the value for the nesting attribute (so "blake" becomes `username`). When
 the remaining attribute and relationship key paths are evaluated against the parsed data, the value of the nesting attribute
 is substituted into the key path before it is applied. So your @"(username).email" key path becomes @"blake.email" and the
 mapping continues.
@@ -578,7 +601,7 @@ RKObjectMapping* mapping = [RKObjectMapping mappingForClass:[User class]];
 mapping.forceCollectionMapping = YES;
 [mapping mapKeyOfNestedDictionaryToAttribute:@"username"];
 [mapping mapFromKeyPath:@"(username).email" toAttribute:"email"];
-[mapping mapFromKeyPath:@"(username).favoriteAnimal" toAttribute:"favoriteAnimal"];
+[mapping mapFromKeyPath:@"(username).favorite_animal" toAttribute:"favoriteAnimal"];
 ```
 ### Dynamic Object Mapping
 
@@ -586,24 +609,25 @@ Thus far we have examined clear-cut cases where the appropriate object mapping c
 key path or by the developer directly providing the mapping. Sometimes it is desirable to dynamically determine the appropriate
 object mapping to use at mapping time. Perhaps we have a collection of objects with identical attribute names, but we wish
 to represent them differently. Or maybe we are loading a collection of objects that are not KVC compliant, but contain a mixture
-of types that we would like to model. RestKit supports such use cases via the RKObjectDynamicMapping class. 
-RKObjectDynamicMapping is a sibling class to RKObjectMapping and can be added to instances of RKObjectMappingProvider and
-used to configure RKObjectMappingOperation instances. RKObjectDynamicMapping allows you to hook into the mapping process
+of types that we would like to model. RestKit supports such use cases via the RKDynamicObjectMapping class. 
+RKDynamicObjectMapping is a sibling class to RKObjectMapping and can be added to instances of RKObjectMappingProvider and
+used to configure RKObjectMappingOperation instances. RKDynamicObjectMapping allows you to hook into the mapping process
 and determine an appropriate RKObjectMapping to use on a per-object basis. 
 
-When RestKit is performing a mapping operation and the current mapping being applied is an RKObjectDynamicMapping instance,
+When RestKit is performing a mapping operation and the current mapping being applied is an RKDynamicObjectMapping instance,
 the dynamic mapping will be sent the `objectMappingForDictionary:` message with the NSDictionary that is currently being 
 mapped. The dynamic mapping is responsible for introspecting the contents of the dictionary and returning an RKObjectMapping
 instance that can be used to map the data into a concrete object.
 
 There are three ways in which the determination of the appropriate object mapping can be made:
+
 1. Via a declarative matcher on an attribute within the mappable data. If your dynamic data contains an attribute that can
 be used to infer the appropriate object type, then you are in luck -- RestKit can handle the dynamic mapping via simple 
 configuration.
 2. Via a delegate callback. If your data requires some special analysis or you want to dynamically construct an object mapping
-to handle the data, you can assign a delegate to the RKObjectDynamicMapping and you will be called back to perform whatever
+to handle the data, you can assign a delegate to the RKDynamicObjectMapping and you will be called back to perform whatever
 logic you need to implement the object mapping lookup/construction.
-3. Via a delegate block invocation. Similar to the delegate configuration, you can assign a delegateBlock to the RKObjectDynamicMapping that will be invoked to determine the appropriate RKObjectMapping to use for the mappable data.
+3. Via a delegate block invocation. Similar to the delegate configuration, you can assign a delegateBlock to the RKDynamicObjectMapping that will be invoked to determine the appropriate RKObjectMapping to use for the mappable data.
 
 To illustrate these concepts, let's consider the following JSON fragment:
 
@@ -643,7 +667,7 @@ RKObjectMapping* boyMapping = [RKObjectMapping mappingForClass:[Boy class]];
 [boyMapping mapAttributes:@"name", nil];
 RKObjectMapping* girlMapping = [RKObjectMapping mappingForClass:[Girl class]];
 [girlMapping mapAttributes:@"name", nil];
-RKObjectDynamicMapping* dynamicMapping = [RKObjectDynamicMapping dynamicMapping];
+RKDynamicObjectMapping* dynamicMapping = [RKDynamicObjectMapping dynamicMapping];
 [boyMapping mapKeyPath:@"friends" toRelationship:@"friends" withMapping:dynamicMapping];
 [girlMapping mapKeyPath:@"friends" toRelationship:@"friends" withMapping:dynamicMapping];
 
@@ -713,7 +737,7 @@ Let's take a look at how you can leverage key-value validation to perform the ab
 @implementation Article
 - (BOOL)validateTitle:(id *)ioValue error:(NSError **)outError {
     // Force the title to uppercase
-    *iovalue = [(NSString*)iovalue uppercaseString];
+    *ioValue = [(NSString*)ioValue uppercaseString];
     return YES;
 }
 
@@ -782,7 +806,7 @@ The currently available result coercions are:
         is useful when you encountered a server side error and want to coerce the mapping results into an NSError. This is how `objectLoader:didFailWithError`
         returns server side error messages to you.
 - **RKObjectRouter** - Responsible for generating resource paths for accessing remote representations of objects. Capable of generating a resource
-path by interpolating property values into a string. For example, a path of "/articles/(articleID)" when applied to an Article object with a `articleID` property
+path by interpolating property values into a string. For example, a path of "/articles/:articleID" when applied to an Article object with a `articleID` property
 with the value 12345, would generate "/articles/12345". The object router is used to generate resource paths when getObject, postObject, putObject and deleteObject
 are invoked.
 - **RKErrorMessage** - A simple class providing for the mapping of server-side error messages back to NSError objects. Contains a single `errorMessage` property. When an
@@ -834,7 +858,6 @@ RKObjectRelationshipMapping* articleCommentsMapping = [RKObjectRelationshipMappi
 ### Configuring a Core Data Object Mapping
 ```objc
 #import <RestKit/RestKit.h>
-#import <RestKit/CoreData/CoreData.h>
 
 RKObjectManager* objectManager = [RKObjectManager managerWithBaseURL:@"http://restkit.org"];
 RKManagedObjectStore* objectStore = [RKManagedObjectStore objectStoreWithStoreFilename:@"MyApp.sqlite"];
