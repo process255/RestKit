@@ -21,7 +21,6 @@
 				255B7593133BABCD00ED76AD /* PBXTargetDependency */,
 				20808E0913DE9137000A156A /* PBXTargetDependency */,
 				255B7595133BABCD00ED76AD /* PBXTargetDependency */,
-				255B7597133BABCD00ED76AD /* PBXTargetDependency */,
 				255B7599133BABCD00ED76AD /* PBXTargetDependency */,
 				259DF78A134029BB00233DF4 /* PBXTargetDependency */,
 				255B759B133BABCD00ED76AD /* PBXTargetDependency */,
@@ -343,13 +342,6 @@
 			remoteGlobalIDString = 2590E64E125231F600531FA8;
 			remoteInfo = "RestKitJSONParser+YAJL";
 		};
-		255B7596133BABCD00ED76AD /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 2590E66A1252353700531FA8;
-			remoteInfo = "RestKitJSONParser+SBJSON";
-		};
 		255B7598133BABCD00ED76AD /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
@@ -392,12 +384,61 @@
 			remoteGlobalIDString = 259DF7791340290600233DF4;
 			remoteInfo = "RestKitXMLParser+libxml";
 		};
-		25E5F2BD133C2EA500C33091 /* PBXContainerItemProxy */ = {
+		C6951D1E160CD6F5009C5E50 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 255B7588133BABBF00ED76AD;
-			remoteInfo = RestKit;
+			remoteGlobalIDString = 253A07FB1255161B00976E89;
+			remoteInfo = RestKitNetwork;
+		};
+		C6951D20160CD6F5009C5E50 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 253A08021255162C00976E89;
+			remoteInfo = RestKitObjectMapping;
+		};
+		C6951D22160CD6F5009C5E50 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 253A080B12551D3000976E89;
+			remoteInfo = RestKitSupport;
+		};
+		C6951D24160CD6F5009C5E50 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 20808DBC13DE8CDC000A156A;
+			remoteInfo = "RestKitJSONParser+NXJSON";
+		};
+		C6951D26160CD6F5009C5E50 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 2590E64E125231F600531FA8;
+			remoteInfo = "RestKitJSONParser+YAJL";
+		};
+		C6951D28160CD6F5009C5E50 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 73057FD01331AD2E001908EE;
+			remoteInfo = "RestKitJSONParser+JSONKit";
+		};
+		C6951D2A160CD6F5009C5E50 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 259DF7791340290600233DF4;
+			remoteInfo = "RestKitXMLParser+Libxml";
+		};
+		C6951D2C160CD6F5009C5E50 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 253A081312551D5300976E89;
+			remoteInfo = RestKitCoreData;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -1728,7 +1769,14 @@
 			buildRules = (
 			);
 			dependencies = (
-				25E5F2BE133C2EA500C33091 /* PBXTargetDependency */,
+				C6951D1F160CD6F5009C5E50 /* PBXTargetDependency */,
+				C6951D21160CD6F5009C5E50 /* PBXTargetDependency */,
+				C6951D23160CD6F5009C5E50 /* PBXTargetDependency */,
+				C6951D25160CD6F5009C5E50 /* PBXTargetDependency */,
+				C6951D27160CD6F5009C5E50 /* PBXTargetDependency */,
+				C6951D29160CD6F5009C5E50 /* PBXTargetDependency */,
+				C6951D2B160CD6F5009C5E50 /* PBXTargetDependency */,
+				C6951D2D160CD6F5009C5E50 /* PBXTargetDependency */,
 			);
 			name = RestKitThree20;
 			productName = "Three20 Support";
@@ -2280,11 +2328,6 @@
 			target = 2590E64E125231F600531FA8 /* RestKitJSONParser+YAJL */;
 			targetProxy = 255B7594133BABCD00ED76AD /* PBXContainerItemProxy */;
 		};
-		255B7597133BABCD00ED76AD /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 2590E66A1252353700531FA8 /* RestKitJSONParser+SBJSON */;
-			targetProxy = 255B7596133BABCD00ED76AD /* PBXContainerItemProxy */;
-		};
 		255B7599133BABCD00ED76AD /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 73057FD01331AD2E001908EE /* RestKitJSONParser+JSONKit */;
@@ -2305,10 +2348,45 @@
 			target = 259DF7791340290600233DF4 /* RestKitXMLParser+Libxml */;
 			targetProxy = 259DF789134029BB00233DF4 /* PBXContainerItemProxy */;
 		};
-		25E5F2BE133C2EA500C33091 /* PBXTargetDependency */ = {
+		C6951D1F160CD6F5009C5E50 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 255B7588133BABBF00ED76AD /* RestKit */;
-			targetProxy = 25E5F2BD133C2EA500C33091 /* PBXContainerItemProxy */;
+			target = 253A07FB1255161B00976E89 /* RestKitNetwork */;
+			targetProxy = C6951D1E160CD6F5009C5E50 /* PBXContainerItemProxy */;
+		};
+		C6951D21160CD6F5009C5E50 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 253A08021255162C00976E89 /* RestKitObjectMapping */;
+			targetProxy = C6951D20160CD6F5009C5E50 /* PBXContainerItemProxy */;
+		};
+		C6951D23160CD6F5009C5E50 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 253A080B12551D3000976E89 /* RestKitSupport */;
+			targetProxy = C6951D22160CD6F5009C5E50 /* PBXContainerItemProxy */;
+		};
+		C6951D25160CD6F5009C5E50 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 20808DBC13DE8CDC000A156A /* RestKitJSONParser+NXJSON */;
+			targetProxy = C6951D24160CD6F5009C5E50 /* PBXContainerItemProxy */;
+		};
+		C6951D27160CD6F5009C5E50 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 2590E64E125231F600531FA8 /* RestKitJSONParser+YAJL */;
+			targetProxy = C6951D26160CD6F5009C5E50 /* PBXContainerItemProxy */;
+		};
+		C6951D29160CD6F5009C5E50 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 73057FD01331AD2E001908EE /* RestKitJSONParser+JSONKit */;
+			targetProxy = C6951D28160CD6F5009C5E50 /* PBXContainerItemProxy */;
+		};
+		C6951D2B160CD6F5009C5E50 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 259DF7791340290600233DF4 /* RestKitXMLParser+Libxml */;
+			targetProxy = C6951D2A160CD6F5009C5E50 /* PBXContainerItemProxy */;
+		};
+		C6951D2D160CD6F5009C5E50 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 253A081312551D5300976E89 /* RestKitCoreData */;
+			targetProxy = C6951D2C160CD6F5009C5E50 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -2362,6 +2440,7 @@
 					armv6,
 					"$(ARCHS_STANDARD_32_BIT)",
 				);
+				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				COPY_PHASE_STRIP = NO;
 				DSTROOT = "";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
@@ -2391,6 +2470,7 @@
 					armv6,
 					"$(ARCHS_STANDARD_32_BIT)",
 				);
+				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				DSTROOT = "";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -2417,6 +2497,7 @@
 					armv6,
 					"$(ARCHS_STANDARD_32_BIT)",
 				);
+				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				DSTROOT = "";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -2444,6 +2525,7 @@
 					armv6,
 					"$(ARCHS_STANDARD_32_BIT)",
 				);
+				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				BUILD_STYLE = Debug;
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -2478,6 +2560,7 @@
 					armv6,
 					"$(ARCHS_STANDARD_32_BIT)",
 				);
+				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				BUILD_STYLE = Release;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -2530,6 +2613,7 @@
 					armv6,
 					"$(ARCHS_STANDARD_32_BIT)",
 				);
+				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				BUILD_STYLE = Release;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -2550,6 +2634,7 @@
 					armv6,
 					"$(ARCHS_STANDARD_32_BIT)",
 				);
+				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				BUILD_STYLE = Release;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -2570,6 +2655,7 @@
 					armv6,
 					"$(ARCHS_STANDARD_32_BIT)",
 				);
+				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				BUILD_STYLE = Release;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -2590,6 +2676,7 @@
 					armv6,
 					"$(ARCHS_STANDARD_32_BIT)",
 				);
+				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				BUILD_STYLE = Release;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -2617,6 +2704,7 @@
 					armv6,
 					"$(ARCHS_STANDARD_32_BIT)",
 				);
+				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				BUILD_STYLE = Release;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -2640,6 +2728,7 @@
 					armv6,
 					"$(ARCHS_STANDARD_32_BIT)",
 				);
+				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_THUMB_SUPPORT = NO;
@@ -2662,6 +2751,7 @@
 					armv6,
 					"$(ARCHS_STANDARD_32_BIT)",
 				);
+				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				BUILD_STYLE = Release;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -2682,6 +2772,7 @@
 					armv6,
 					"$(ARCHS_STANDARD_32_BIT)",
 				);
+				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				BUILD_STYLE = Release;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -2760,6 +2851,7 @@
 					armv6,
 					"$(ARCHS_STANDARD_32_BIT)",
 				);
+				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				BUILD_STYLE = Debug;
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -2780,6 +2872,7 @@
 					armv6,
 					"$(ARCHS_STANDARD_32_BIT)",
 				);
+				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				BUILD_STYLE = Release;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -2800,6 +2893,7 @@
 					armv6,
 					"$(ARCHS_STANDARD_32_BIT)",
 				);
+				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				BUILD_STYLE = Debug;
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -2820,6 +2914,7 @@
 					armv6,
 					"$(ARCHS_STANDARD_32_BIT)",
 				);
+				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				BUILD_STYLE = Release;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -2840,6 +2935,7 @@
 					armv6,
 					"$(ARCHS_STANDARD_32_BIT)",
 				);
+				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				BUILD_STYLE = Debug;
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -2860,6 +2956,7 @@
 					armv6,
 					"$(ARCHS_STANDARD_32_BIT)",
 				);
+				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				BUILD_STYLE = Release;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -2880,6 +2977,7 @@
 					armv6,
 					"$(ARCHS_STANDARD_32_BIT)",
 				);
+				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				BUILD_STYLE = Debug;
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -2899,6 +2997,7 @@
 					armv6,
 					"$(ARCHS_STANDARD_32_BIT)",
 				);
+				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				BUILD_STYLE = Release;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -2933,9 +3032,11 @@
 		255920CD13BDEDB400E9C29C /* Ad Hoc */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos macosx";
+				VALID_ARCHS = "armv6 armv7 i386 x86_64";
 			};
 			name = "Ad Hoc";
 		};
@@ -2947,6 +3048,7 @@
 					armv6,
 					"$(ARCHS_STANDARD_32_BIT)",
 				);
+				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				BUILD_STYLE = Release;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -2967,6 +3069,7 @@
 					armv6,
 					"$(ARCHS_STANDARD_32_BIT)",
 				);
+				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				BUILD_STYLE = Release;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -2987,6 +3090,7 @@
 					armv6,
 					"$(ARCHS_STANDARD_32_BIT)",
 				);
+				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				BUILD_STYLE = Release;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -3007,6 +3111,7 @@
 					armv6,
 					"$(ARCHS_STANDARD_32_BIT)",
 				);
+				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				BUILD_STYLE = Release;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -3034,6 +3139,7 @@
 					armv6,
 					"$(ARCHS_STANDARD_32_BIT)",
 				);
+				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				BUILD_STYLE = Release;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -3057,6 +3163,7 @@
 					armv6,
 					"$(ARCHS_STANDARD_32_BIT)",
 				);
+				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_THUMB_SUPPORT = NO;
@@ -3079,6 +3186,7 @@
 					armv6,
 					"$(ARCHS_STANDARD_32_BIT)",
 				);
+				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_THUMB_SUPPORT = NO;
 				HEADER_SEARCH_PATHS = /usr/include/libxml2;
@@ -3100,6 +3208,7 @@
 					armv6,
 					"$(ARCHS_STANDARD_32_BIT)",
 				);
+				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				BUILD_STYLE = Release;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -3120,6 +3229,7 @@
 					armv6,
 					"$(ARCHS_STANDARD_32_BIT)",
 				);
+				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				BUILD_STYLE = Release;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -3193,27 +3303,33 @@
 		255B758A133BABBF00ED76AD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos macosx";
+				VALID_ARCHS = "armv6 armv7 i386 x86_64";
 			};
 			name = Debug;
 		};
 		255B758B133BABBF00ED76AD /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos macosx";
+				VALID_ARCHS = "armv6 armv7 i386 x86_64";
 			};
 			name = Release;
 		};
 		255B758C133BABBF00ED76AD /* Distribution */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos macosx";
+				VALID_ARCHS = "armv6 armv7 i386 x86_64";
 			};
 			name = Distribution;
 		};
@@ -3225,6 +3341,7 @@
 					armv6,
 					"$(ARCHS_STANDARD_32_BIT)",
 				);
+				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				BUILD_STYLE = Debug;
 				COPY_PHASE_STRIP = NO;
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
@@ -3252,6 +3369,7 @@
 					armv6,
 					"$(ARCHS_STANDARD_32_BIT)",
 				);
+				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				BUILD_STYLE = Release;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -3279,6 +3397,7 @@
 					armv6,
 					"$(ARCHS_STANDARD_32_BIT)",
 				);
+				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				BUILD_STYLE = Debug;
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -3302,6 +3421,7 @@
 					armv6,
 					"$(ARCHS_STANDARD_32_BIT)",
 				);
+				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				BUILD_STYLE = Release;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -3325,6 +3445,7 @@
 					armv6,
 					"$(ARCHS_STANDARD_32_BIT)",
 				);
+				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = DEBUG;
 				GCC_THUMB_SUPPORT = NO;
@@ -3347,6 +3468,7 @@
 					armv6,
 					"$(ARCHS_STANDARD_32_BIT)",
 				);
+				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_THUMB_SUPPORT = NO;
 				HEADER_SEARCH_PATHS = /usr/include/libxml2;
@@ -3368,6 +3490,7 @@
 					armv6,
 					"$(ARCHS_STANDARD_32_BIT)",
 				);
+				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_THUMB_SUPPORT = NO;
 				HEADER_SEARCH_PATHS = /usr/include/libxml2;
@@ -3483,6 +3606,7 @@
 					armv6,
 					"$(ARCHS_STANDARD_32_BIT)",
 				);
+				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -3505,6 +3629,7 @@
 					armv6,
 					"$(ARCHS_STANDARD_32_BIT)",
 				);
+				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_THUMB_SUPPORT = NO;
