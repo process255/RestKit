@@ -98,14 +98,14 @@ typedef NSUInteger YAJLParserStatus;
   
   yajl_handle handle_;
   
-  __weak id <YAJLParserDelegate> delegate_; // weak
+  __unsafe_unretained id <YAJLParserDelegate> delegate_; // weak
     
   YAJLParserOptions parserOptions_;
 
   NSError *parserError_;
 }
 
-@property (assign, nonatomic) __weak id <YAJLParserDelegate> delegate;
+@property (assign, nonatomic) __unsafe_unretained id <YAJLParserDelegate> delegate;
 @property (readonly, retain, nonatomic) NSError *parserError;
 @property (readonly, nonatomic) YAJLParserOptions parserOptions;
 
