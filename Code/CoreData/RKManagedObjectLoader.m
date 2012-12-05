@@ -108,7 +108,7 @@
         NSArray* results = [result asCollection];
         
         NSArray* cachedObjects = [self.objectStore objectsForResourcePath:rkURL.resourcePath];
-        NSLog(@"results count = %d, cachedObjects count = %d", [results count], [cachedObjects count]);
+//        NSLog(@"results count = %d, cachedObjects count = %d", [results count], [cachedObjects count]);
         int counter = 0;
         for (id object in cachedObjects) {
             if (NO == [results containsObject:object]) {
@@ -117,7 +117,7 @@
                 counter ++;
             }
         }
-        NSLog(@">>>>>>>>> deleted = %d", counter);
+//        NSLog(@">>>>>>>>> deleted = %d", counter);
     } else {
         RKLogWarning(@"Unable to perform cleanup of server-side object deletions: unable to determine resource path.");
     } 
