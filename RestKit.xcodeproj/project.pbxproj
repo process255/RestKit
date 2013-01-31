@@ -2409,7 +2409,7 @@
 				SKIP_INSTALL = YES;
 				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos macosx";
 				SYMROOT = Build;
-				VALID_ARCHS = "armv6 armv7 i386 x86_64";
+				VALID_ARCHS = "armv7 i386 x86_64";
 			};
 			name = Debug;
 		};
@@ -2430,7 +2430,7 @@
 				SKIP_INSTALL = YES;
 				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos macosx";
 				SYMROOT = Build;
-				VALID_ARCHS = "armv6 armv7 i386 x86_64";
+				VALID_ARCHS = "armv7 i386 x86_64";
 			};
 			name = Release;
 		};
@@ -2549,7 +2549,6 @@
 				PUBLIC_HEADERS_FOLDER_PATH = include/RestKit/Three20;
 				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
 				USER_HEADER_SEARCH_PATHS = "";
-				VALID_ARCHS = "armv6 armv7 i386";
 			};
 			name = Debug;
 		};
@@ -2582,7 +2581,6 @@
 				PRODUCT_NAME = RestKitThree20;
 				PUBLIC_HEADERS_FOLDER_PATH = include/RestKit/Three20;
 				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
-				VALID_ARCHS = "armv6 armv7 i386";
 				ZERO_LINK = NO;
 			};
 			name = Release;
@@ -2604,7 +2602,7 @@
 				SKIP_INSTALL = YES;
 				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos macosx";
 				SYMROOT = Build;
-				VALID_ARCHS = "armv6 armv7 i386 x86_64";
+				VALID_ARCHS = "armv7 i386 x86_64";
 			};
 			name = Distribution;
 		};
@@ -2795,7 +2793,6 @@
 				PRODUCT_NAME = RestKitThree20;
 				PUBLIC_HEADERS_FOLDER_PATH = include/RestKit/Three20;
 				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
-				VALID_ARCHS = "armv6 armv7 i386";
 				ZERO_LINK = NO;
 			};
 			name = Distribution;
@@ -3029,7 +3026,7 @@
 				SKIP_INSTALL = YES;
 				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos macosx";
 				SYMROOT = Build;
-				VALID_ARCHS = "armv6 armv7 i386 x86_64";
+				VALID_ARCHS = "armv7 i386 x86_64";
 			};
 			name = "Ad Hoc";
 		};
@@ -3040,7 +3037,6 @@
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos macosx";
-				VALID_ARCHS = "armv6 armv7 i386 x86_64";
 			};
 			name = "Ad Hoc";
 		};
@@ -3253,7 +3249,6 @@
 				PRODUCT_NAME = RestKitThree20;
 				PUBLIC_HEADERS_FOLDER_PATH = include/RestKit/Three20;
 				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
-				VALID_ARCHS = "armv6 armv7 i386";
 				ZERO_LINK = NO;
 			};
 			name = "Ad Hoc";
@@ -3311,7 +3306,6 @@
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos macosx";
-				VALID_ARCHS = "armv6 armv7 i386 x86_64";
 			};
 			name = Debug;
 		};
@@ -3322,7 +3316,6 @@
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos macosx";
-				VALID_ARCHS = "armv6 armv7 i386 x86_64";
 			};
 			name = Release;
 		};
@@ -3333,7 +3326,6 @@
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos macosx";
-				VALID_ARCHS = "armv6 armv7 i386 x86_64";
 			};
 			name = Distribution;
 		};
