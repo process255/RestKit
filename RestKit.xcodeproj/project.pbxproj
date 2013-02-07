@@ -582,11 +582,11 @@
 		258E490013C51FE600C9C883 /* RKJSONParserJSONKitSpec.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RKJSONParserJSONKitSpec.m; sourceTree = "<group>"; };
 		2590E64F125231F600531FA8 /* libRestKitJSONParserYAJL.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libRestKitJSONParserYAJL.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		2590E66B1252353700531FA8 /* libRestKitJSONParserSBJSON.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libRestKitJSONParserSBJSON.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		2590E674125235C200531FA8 /* JSON.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JSON.h; sourceTree = "<group>"; };
+		2590E674125235C200531FA8 /* JSON.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = JSON.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		2590E675125235C200531FA8 /* NSObject+SBJSON.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSObject+SBJSON.h"; sourceTree = "<group>"; };
 		2590E676125235C200531FA8 /* NSObject+SBJSON.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSObject+SBJSON.m"; sourceTree = "<group>"; };
 		2590E677125235C200531FA8 /* NSString+SBJSON.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+SBJSON.h"; sourceTree = "<group>"; };
-		2590E678125235C200531FA8 /* NSString+SBJSON.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+SBJSON.m"; sourceTree = "<group>"; };
+		2590E678125235C200531FA8 /* NSString+SBJSON.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = "NSString+SBJSON.m"; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		2590E679125235C200531FA8 /* SBJsonBase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SBJsonBase.h; sourceTree = "<group>"; };
 		2590E67A125235C200531FA8 /* SBJsonBase.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SBJsonBase.m; sourceTree = "<group>"; };
 		2590E67B125235C200531FA8 /* SBJsonParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SBJsonParser.h; sourceTree = "<group>"; };
@@ -2409,7 +2409,6 @@
 				SKIP_INSTALL = YES;
 				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos macosx";
 				SYMROOT = Build;
-				VALID_ARCHS = "armv7 i386 x86_64";
 			};
 			name = Debug;
 		};
@@ -2430,7 +2429,6 @@
 				SKIP_INSTALL = YES;
 				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos macosx";
 				SYMROOT = Build;
-				VALID_ARCHS = "armv7 i386 x86_64";
 			};
 			name = Release;
 		};
@@ -2438,11 +2436,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = (
-					armv6,
-					"$(ARCHS_STANDARD_32_BIT)",
-				);
-				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				COPY_PHASE_STRIP = NO;
 				DSTROOT = "";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
@@ -2468,11 +2461,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = (
-					armv6,
-					"$(ARCHS_STANDARD_32_BIT)",
-				);
-				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				DSTROOT = "";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -2495,11 +2483,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = (
-					armv6,
-					"$(ARCHS_STANDARD_32_BIT)",
-				);
-				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				DSTROOT = "";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -2523,11 +2506,6 @@
 			buildSettings = {
 				ADDITIONAL_SDKS = "";
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = (
-					armv6,
-					"$(ARCHS_STANDARD_32_BIT)",
-				);
-				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				BUILD_STYLE = Debug;
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -2557,11 +2535,6 @@
 			buildSettings = {
 				ADDITIONAL_SDKS = "";
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = (
-					armv6,
-					"$(ARCHS_STANDARD_32_BIT)",
-				);
-				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				BUILD_STYLE = Release;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -2602,7 +2575,6 @@
 				SKIP_INSTALL = YES;
 				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos macosx";
 				SYMROOT = Build;
-				VALID_ARCHS = "armv7 i386 x86_64";
 			};
 			name = Distribution;
 		};
@@ -2610,11 +2582,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = (
-					armv6,
-					"$(ARCHS_STANDARD_32_BIT)",
-				);
-				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				BUILD_STYLE = Release;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -2631,11 +2598,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = (
-					armv6,
-					"$(ARCHS_STANDARD_32_BIT)",
-				);
-				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				BUILD_STYLE = Release;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -2652,11 +2614,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = (
-					armv6,
-					"$(ARCHS_STANDARD_32_BIT)",
-				);
-				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				BUILD_STYLE = Release;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -2673,11 +2630,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = (
-					armv6,
-					"$(ARCHS_STANDARD_32_BIT)",
-				);
-				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				BUILD_STYLE = Release;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -2701,11 +2653,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = (
-					armv6,
-					"$(ARCHS_STANDARD_32_BIT)",
-				);
-				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				BUILD_STYLE = Release;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -2725,11 +2672,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = (
-					armv6,
-					"$(ARCHS_STANDARD_32_BIT)",
-				);
-				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_THUMB_SUPPORT = NO;
@@ -2748,11 +2690,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = (
-					armv6,
-					"$(ARCHS_STANDARD_32_BIT)",
-				);
-				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				BUILD_STYLE = Release;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -2769,11 +2706,6 @@
 			buildSettings = {
 				ADDITIONAL_SDKS = "";
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = (
-					armv6,
-					"$(ARCHS_STANDARD_32_BIT)",
-				);
-				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				BUILD_STYLE = Release;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -2847,11 +2779,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = (
-					armv6,
-					"$(ARCHS_STANDARD_32_BIT)",
-				);
-				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				BUILD_STYLE = Debug;
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -2868,10 +2795,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = (
-					armv6,
-					"$(ARCHS_STANDARD_32_BIT)",
-				);
 				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				BUILD_STYLE = Release;
 				COPY_PHASE_STRIP = YES;
@@ -2889,11 +2812,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = (
-					armv6,
-					"$(ARCHS_STANDARD_32_BIT)",
-				);
-				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				BUILD_STYLE = Debug;
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -2910,11 +2828,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = (
-					armv6,
-					"$(ARCHS_STANDARD_32_BIT)",
-				);
-				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				BUILD_STYLE = Release;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -2931,11 +2844,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = (
-					armv6,
-					"$(ARCHS_STANDARD_32_BIT)",
-				);
-				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				BUILD_STYLE = Debug;
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -2952,11 +2860,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = (
-					armv6,
-					"$(ARCHS_STANDARD_32_BIT)",
-				);
-				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				BUILD_STYLE = Release;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -2973,11 +2876,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = (
-					armv6,
-					"$(ARCHS_STANDARD_32_BIT)",
-				);
-				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				BUILD_STYLE = Debug;
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -2993,11 +2891,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = (
-					armv6,
-					"$(ARCHS_STANDARD_32_BIT)",
-				);
-				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				BUILD_STYLE = Release;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -3026,7 +2919,6 @@
 				SKIP_INSTALL = YES;
 				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos macosx";
 				SYMROOT = Build;
-				VALID_ARCHS = "armv7 i386 x86_64";
 			};
 			name = "Ad Hoc";
 		};
@@ -3044,11 +2936,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = (
-					armv6,
-					"$(ARCHS_STANDARD_32_BIT)",
-				);
-				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				BUILD_STYLE = Release;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -3065,11 +2952,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = (
-					armv6,
-					"$(ARCHS_STANDARD_32_BIT)",
-				);
-				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				BUILD_STYLE = Release;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -3086,11 +2968,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = (
-					armv6,
-					"$(ARCHS_STANDARD_32_BIT)",
-				);
-				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				BUILD_STYLE = Release;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -3107,11 +2984,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = (
-					armv6,
-					"$(ARCHS_STANDARD_32_BIT)",
-				);
-				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				BUILD_STYLE = Release;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -3135,11 +3007,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = (
-					armv6,
-					"$(ARCHS_STANDARD_32_BIT)",
-				);
-				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				BUILD_STYLE = Release;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -3159,11 +3026,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = (
-					armv6,
-					"$(ARCHS_STANDARD_32_BIT)",
-				);
-				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_THUMB_SUPPORT = NO;
@@ -3182,11 +3044,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = (
-					armv6,
-					"$(ARCHS_STANDARD_32_BIT)",
-				);
-				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_THUMB_SUPPORT = NO;
 				HEADER_SEARCH_PATHS = /usr/include/libxml2;
@@ -3204,11 +3061,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = (
-					armv6,
-					"$(ARCHS_STANDARD_32_BIT)",
-				);
-				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				BUILD_STYLE = Release;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -3225,11 +3077,6 @@
 			buildSettings = {
 				ADDITIONAL_SDKS = "";
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = (
-					armv6,
-					"$(ARCHS_STANDARD_32_BIT)",
-				);
-				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				BUILD_STYLE = Release;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -3333,11 +3180,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = (
-					armv6,
-					"$(ARCHS_STANDARD_32_BIT)",
-				);
-				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				BUILD_STYLE = Debug;
 				COPY_PHASE_STRIP = NO;
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
@@ -3361,11 +3203,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = (
-					armv6,
-					"$(ARCHS_STANDARD_32_BIT)",
-				);
-				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				BUILD_STYLE = Release;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -3389,11 +3226,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = (
-					armv6,
-					"$(ARCHS_STANDARD_32_BIT)",
-				);
-				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				BUILD_STYLE = Debug;
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -3413,11 +3245,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = (
-					armv6,
-					"$(ARCHS_STANDARD_32_BIT)",
-				);
-				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				BUILD_STYLE = Release;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -3437,11 +3264,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = (
-					armv6,
-					"$(ARCHS_STANDARD_32_BIT)",
-				);
-				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = DEBUG;
 				GCC_THUMB_SUPPORT = NO;
@@ -3460,11 +3282,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = (
-					armv6,
-					"$(ARCHS_STANDARD_32_BIT)",
-				);
-				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_THUMB_SUPPORT = NO;
 				HEADER_SEARCH_PATHS = /usr/include/libxml2;
@@ -3482,11 +3299,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = (
-					armv6,
-					"$(ARCHS_STANDARD_32_BIT)",
-				);
-				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_THUMB_SUPPORT = NO;
 				HEADER_SEARCH_PATHS = /usr/include/libxml2;
@@ -3598,11 +3410,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = (
-					armv6,
-					"$(ARCHS_STANDARD_32_BIT)",
-				);
-				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -3621,11 +3428,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = (
-					armv6,
-					"$(ARCHS_STANDARD_32_BIT)",
-				);
-				"ARCHS[sdk=iphoneos6.0]" = "$(ARCHS_STANDARD_32_BIT)";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_THUMB_SUPPORT = NO;
