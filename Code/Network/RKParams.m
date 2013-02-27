@@ -9,6 +9,11 @@
 #import "RKParams.h"
 #import "../Support/RKLog.h"
 
+// Need for iOS 5 UIDevice workaround
+#if TARGET_OS_IPHONE
+#import <UIKit/UIKit.h>
+#endif
+
 // Set Logging Component
 #undef RKLogComponent
 #define RKLogComponent lcl_cRestKitNetwork
@@ -206,7 +211,12 @@ NSString* const kRKStringBoundary = @"0xKhTmLbOuNdArY";
         // NOTE: When we are assigned to the URL request, we get
         // retained. We release ourselves here to ensure the retain
         // count will hit zero after upload is complete.
-        [self release];
+        //
+        // This behavior does not seem to happen on iOS 5. This is a workaround until
+        // the problem can be analyzed in more detail
+        if ([[[UIDevice currentDevice] systemVersion] compare:@"5.0" options:NSNumericSearch] == NSOrderedAscending) {
+            [self release];
+        }
     }
 }
 

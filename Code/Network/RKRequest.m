@@ -570,24 +570,4 @@
     }
     return [compositCacheKey MD5];
 }
-
-- (void)setParams:(NSObject<RKRequestSerializable> *)params
-{
-    if (params == _params)
-    {
-        return;
-    }
-    NSObject<RKRequestSerializable> *oldParams = _params;
-    _params = [params retain]; 
-    [oldParams release];
-    
-    // Runtime check for iOS5 -- 
-    // If we're in iOS 5.0+, add an extra retain.
-    NSString *reqSysVer = @"5.0";
-    NSString *currSysVer = [[UIDevice currentDevice] systemVersion];
-    if ([currSysVer compare:reqSysVer options:NSNumericSearch] != NSOrderedAscending) {
-        NSLog(@"Adding extra retain to params.");
-        _params = [_params retain];
-    }
-}
 @end
